@@ -1,0 +1,52 @@
+name: paani
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.5+1
+  flutter_phoenix: ^1.1.1
+  shared_preferences: ^2.5.3
+  dio: ^5.9.0
+  google_fonts: ^6.3.2
+  icons_plus: ^5.0.0
+  intl: ^0.20.2
+  connectivity_plus: ^7.0.0
+  cached_network_image: ^3.4.1
+  image_picker: ^1.2.0
+  skeletonizer: ^2.1.0+1
+  flutter_staggered_grid_view: ^0.7.0
+  url_launcher: ^6.3.2
+  file_picker: ^10.3.3
+  syncfusion_flutter_pdfviewer: ^30.2.7
+  permission_handler: ^12.0.1
+  shimmer: ^3.0.0
+  pinput: ^6.0.1
+  latlong_to_place: ^0.0.7
+  intl_phone_field: ^3.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/appIcon.png"
+  
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/
