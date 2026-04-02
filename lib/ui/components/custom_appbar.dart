@@ -1,8 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:paani/core/extensions/sizer.dart';
 import '../../core/resources/app_colors.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final bool hasLeading;
   final String title;
   final IconData? icon;
   final VoidCallback? onTap;
@@ -10,6 +12,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   const CustomAppBar({
     super.key,
+    this.hasLeading = true,
     required this.title,
     this.icon,
     this.onTap,
@@ -37,6 +40,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         backgroundColor: AppColor.white,
         surfaceTintColor: AppColor.white,
 
+        leading: hasLeading
+            ? IconButton(
+                icon: Icon(
+                  icon ?? CupertinoIcons.arrow_left,
+                  color: AppColor.appColor1,
+                ),
+                onPressed: icon == null
+                    ? onTap ?? () => Navigator.pop(context)
+                    : onTap,
+              )
+            : null,
         title: Text(
           title,
           style: TextStyle(
