@@ -2,6 +2,13 @@ import 'package:flutter/foundation.dart';
 import '../models/product_model.dart';
 
 class CartController extends ChangeNotifier {
+  bool homeLoaded = false;
+
+  void setHomeLoaded() {
+    homeLoaded = true;
+    notifyListeners();
+  }
+
   // Dummy Products for Home View
   final List<ProductModel> products = [
     ProductModel(

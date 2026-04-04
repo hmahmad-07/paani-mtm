@@ -8,10 +8,12 @@ import '../../../core/extensions/routes.dart';
 
 import '../../components/custom_button.dart';
 import '../../components/item_stepper.dart';
+import '../home/product_detail_view.dart';
 import 'user_details_view.dart';
 
 class CartView extends StatelessWidget {
-  const CartView({super.key});
+  final bool showBottomPadding;
+  const CartView({super.key, this.showBottomPadding = false});
 
   @override
   Widget build(BuildContext context) {
@@ -52,81 +54,95 @@ class CartView extends StatelessWidget {
                           itemBuilder: (context, index) {
                             final cartItem = cartItems[index];
                             final product = cartItem.product;
-                            return Container(
-                              padding: EdgeInsets.all(4.w),
-                              decoration: BoxDecoration(
-                                color: AppColor.white,
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColor.grey.withValues(alpha: .1),
-                                    blurRadius: 3,
-                                    spreadRadius: 2,
-                                    offset: const Offset(0, .3),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    height: 20.w,
-                                    width: 20.w,
-                                    padding: EdgeInsets.all(2.w),
-                                    decoration: BoxDecoration(
-                                      color: AppColor.lightGrey.withValues(
-                                        alpha: 0.3,
+                            return GestureDetector(
+                              onTap: () {
+                                AppRoutes.push(
+                                  ProductDetailView(product: product),
+                                );
+                              },
+                              child: Container(
+                                padding: EdgeInsets.all(4.w),
+                                decoration: BoxDecoration(
+                                  color: AppColor.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColor.grey.withValues(
+                                        alpha: .1,
                                       ),
-                                      borderRadius: BorderRadius.circular(12),
+                                      blurRadius: 3,
+                                      spreadRadius: 2,
+                                      offset: const Offset(0, .3),
                                     ),
-                                    child: Image.asset(
-                                      product.imagePath,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                  4.width,
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          product.name,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 12,
-                                            color: AppColor.appDarkColor,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      height: 25.w,
+                                      width: 25.w,
+                                      padding: EdgeInsets.all(3.w),
+                                      decoration: BoxDecoration(
+                                        color: AppColor.lightGrey.withValues(
+                                          alpha: 0.3,
                                         ),
-                                        1.height,
-                                        Text(
-                                          '\$${product.price.toStringAsFixed(2)}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w900,
-                                            fontSize: 14,
-                                            color: AppColor.appColor1,
-                                          ),
-                                        ),
-                                      ],
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Image.asset(
+                                        product.imagePath,
+                                        fit: BoxFit.contain,
+                                      ),
                                     ),
-                                  ),
-                                  ItemStepper(
-                                    quantity: cartItem.quantity,
-                                    size: 24,
-                                    onIncrement: () =>
-                                        cartVC.incrementQuantity(product.id),
-                                    onDecrement: () =>
-                                        cartVC.decrementQuantity(product.id),
-                                  ),
-                                ],
+                                    4.width,
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            product.name,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 12,
+                                              color: AppColor.appDarkColor,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          1.height,
+                                          Text(
+                                            'Rs. ${product.price.toStringAsFixed(2)}',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w900,
+                                              fontSize: 14,
+                                              color: AppColor.appColor1,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    ItemStepper(
+                                      quantity: cartItem.quantity,
+                                      size: 24,
+                                      onIncrement: () =>
+                                          cartVC.incrementQuantity(product.id),
+                                      onDecrement: () =>
+                                          cartVC.decrementQuantity(product.id),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           },
                         ),
                       ),
                       Container(
-                        padding: EdgeInsets.all(6.w),
+                        padding: EdgeInsets.fromLTRB(
+                          6.w,
+                          6.w,
+                          6.w,
+                          showBottomPadding ? 12.h : 6.w,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColor.white,
                           borderRadius: const BorderRadius.vertical(
@@ -154,7 +170,7 @@ class CartView extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  '\$${cartVC.totalAmount.toStringAsFixed(2)}',
+                                  'Rs. ${cartVC.totalAmount.toStringAsFixed(2)}',
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
@@ -175,7 +191,7 @@ class CartView extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  '\$2.00',
+                                  'Rs. 2.00',
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
@@ -200,7 +216,7 @@ class CartView extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  '\$${(cartVC.totalAmount + 2.0).toStringAsFixed(2)}',
+                                  'Rs. ${(cartVC.totalAmount + 2.0).toStringAsFixed(2)}',
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.w900,

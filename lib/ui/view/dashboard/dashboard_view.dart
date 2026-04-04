@@ -30,7 +30,7 @@ class _DashboardViewState extends State<DashboardView> {
 
   final List<Widget> _pages = [
     const HomeView(),
-    const CartView(),
+    const CartView(showBottomPadding: true),
     const OrderTrackingView(),
   ];
 
@@ -40,13 +40,7 @@ class _DashboardViewState extends State<DashboardView> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: AppDrawer(
-        onTabSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-      ),
+      drawer: AppDrawer(),
       appBar: CustomAppBar(
         hasLeading: true,
         icon: Iconsax.menu_1_outline,
@@ -63,10 +57,10 @@ class _DashboardViewState extends State<DashboardView> {
   Widget _buildFloatingBottomBar() {
     return Positioned(
       bottom: 2.h,
-      left: 5.w,
-      right: 5.w,
+      left: 10.w,
+      right: 10.w,
       child: Container(
-        height: 8.5.h,
+        height: 8.h,
         decoration: BoxDecoration(
           color: AppColor.appDarkColor,
           borderRadius: BorderRadius.circular(30),
@@ -113,9 +107,9 @@ class _DashboardViewState extends State<DashboardView> {
           _currentIndex = index;
         });
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: EdgeInsets.symmetric(horizontal: 2.w),
+      child: Container(
+        color: AppColor.transparent,
+        width: 30.w,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -124,18 +118,30 @@ class _DashboardViewState extends State<DashboardView> {
               color: isSelected
                   ? AppColor.white
                   : AppColor.white.withValues(alpha: 0.5),
-              size: isSelected ? 24 : 22,
+              size: 24,
             ),
-            if (isSelected) 0.5.height,
-            if (isSelected)
-              Text(
-                label,
-                style: TextStyle(
-                  color: AppColor.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: isSelected ? 2.h : 0,
+              child: isSelected
+                  ? SingleChildScrollView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      child: Column(
+                        children: [
+                          0.2.height,
+                          Text(
+                            label,
+                            style: TextStyle(
+                              color: AppColor.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
           ],
         ),
       ),

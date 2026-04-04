@@ -1,19 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:icons_plus/icons_plus.dart';
 import '../../../core/resources/app_colors.dart';
 import '../../../core/extensions/sizer.dart';
-
+import '../../../core/extensions/routes.dart';
+import '../../components/custom_appbar.dart';
+import 'order_detail_view.dart';
 
 class OrderTrackingView extends StatelessWidget {
-  const OrderTrackingView({super.key});
+  final bool isStandalone;
+  const OrderTrackingView({super.key, this.isStandalone = false});
 
   @override
   Widget build(BuildContext context) {
+    if (isStandalone) {
+      return Scaffold(
+        backgroundColor: AppColor.white,
+        appBar: const CustomAppBar(title: 'My Orders'),
+        body: _buildBody(),
+      );
+    }
+    return _buildBody();
+  }
+
+  Widget _buildBody() {
     return Container(
       color: AppColor.white,
       height: double.infinity,
       width: double.infinity,
       child: ListView(
-        padding: EdgeInsets.fromLTRB(8.w, 2.h, 8.w, 14.h),
+        padding: EdgeInsets.fromLTRB(8.w, 2.h, 8.w, isStandalone ? 4.h : 14.h),
         children: [
           _buildOrderCard(
             orderId: '#ORD-987654',
@@ -22,9 +37,10 @@ class OrderTrackingView extends StatelessWidget {
             itemsCount: 3,
             totalAmount: 18.50,
             statusColor: AppColor.appColor2,
-            activeStep: 2,
+            icon: Iconsax.truck_fast_outline,
+            imagePath: 'assets/1.5-litr.webp',
           ),
-          4.height,
+          2.height,
           _buildOrderCard(
             orderId: '#ORD-987123',
             date: '01 Apr, 02:15 PM',
@@ -32,9 +48,10 @@ class OrderTrackingView extends StatelessWidget {
             itemsCount: 1,
             totalAmount: 3.50,
             statusColor: Colors.green,
-            activeStep: 3,
+            icon: Iconsax.box_tick_outline,
+            imagePath: 'assets/19-litr-bottle.webp',
           ),
-          4.height,
+          2.height,
           _buildOrderCard(
             orderId: '#ORD-986001',
             date: '28 Mar, 09:00 AM',
@@ -42,7 +59,52 @@ class OrderTrackingView extends StatelessWidget {
             itemsCount: 5,
             totalAmount: 25.00,
             statusColor: AppColor.red,
-            activeStep: -1,
+            icon: Iconsax.box_remove_outline,
+            imagePath: 'assets/200-ml-Cup.webp',
+          ),
+          2.height,
+          _buildOrderCard(
+            orderId: '#ORD-985900',
+            date: '25 Mar, 11:20 AM',
+            status: 'Delivered',
+            itemsCount: 2,
+            totalAmount: 10.00,
+            statusColor: Colors.green,
+            icon: Iconsax.box_tick_outline,
+            imagePath: 'assets/500-ml.webp',
+          ),
+          2.height,
+          _buildOrderCard(
+            orderId: '#ORD-985880',
+            date: '22 Mar, 04:45 PM',
+            status: 'Delivered',
+            itemsCount: 4,
+            totalAmount: 14.20,
+            statusColor: Colors.green,
+            icon: Iconsax.box_tick_outline,
+            imagePath: 'assets/6-litr-bottle.webp',
+          ),
+          2.height,
+          _buildOrderCard(
+            orderId: '#ORD-985777',
+            date: '20 Mar, 08:30 AM',
+            status: 'Pending',
+            itemsCount: 1,
+            totalAmount: 5.00,
+            statusColor: AppColor.grey,
+            icon: Iconsax.clock_outline,
+            imagePath: 'assets/1.5-litr.webp',
+          ),
+          2.height,
+          _buildOrderCard(
+            orderId: '#ORD-985666',
+            date: '18 Mar, 01:10 PM',
+            status: 'Delivered',
+            itemsCount: 6,
+            totalAmount: 42.00,
+            statusColor: Colors.green,
+            icon: Iconsax.box_tick_outline,
+            imagePath: 'assets/19-litr-bottle.webp',
           ),
         ],
       ),
@@ -56,115 +118,142 @@ class OrderTrackingView extends StatelessWidget {
     required int itemsCount,
     required double totalAmount,
     required Color statusColor,
-    required int activeStep,
+    required IconData icon,
+    required String imagePath,
   }) {
-    return Container(
-      padding: EdgeInsets.all(4.w),
-      decoration: BoxDecoration(
-        color: AppColor.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColor.grey.withValues(alpha: .1),
-            blurRadius: 3,
-            spreadRadius: 2,
-            offset: const Offset(0, .3),
+    return GestureDetector(
+      onTap: () {
+        AppRoutes.push(
+          OrderDetailView(
+            orderId: orderId,
+            date: date,
+            status: status,
+            totalAmount: totalAmount,
+            statusColor: statusColor,
+            imagePath: imagePath,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                orderId,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColor.appDarkColor),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  status,
-                  style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 10),
-                ),
-              ),
-            ],
-          ),
-          2.height,
-          Text(
-            date,
-            style: TextStyle(color: AppColor.grey, fontSize: 12),
-          ),
-          2.height,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '$itemsCount Items',
-                style: TextStyle(color: AppColor.darkGrey, fontWeight: FontWeight.w600, fontSize: 12),
-              ),
-              Text(
-                '\$${totalAmount.toStringAsFixed(2)}',
-                style: TextStyle(fontWeight: FontWeight.w900, color: AppColor.appColor1, fontSize: 14),
-              ),
-            ],
-          ),
-          if (activeStep >= 0) ...[
-            3.height,
-            const Divider(),
-            3.height,
-            Row(
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 0.8.h),
+        padding: EdgeInsets.all(4.w),
+        decoration: BoxDecoration(
+          color: AppColor.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColor.grey.withValues(alpha: .1),
+              blurRadius: 3,
+              spreadRadius: 2,
+              offset: const Offset(0, .3),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
               children: [
-                _buildTrackingStep('Pending', activeStep >= 0),
-                _buildTrackingLine(activeStep >= 1),
-                _buildTrackingStep('Confirmed', activeStep >= 1),
-                _buildTrackingLine(activeStep >= 2),
-                _buildTrackingStep('On the way', activeStep >= 2),
-                _buildTrackingLine(activeStep >= 3),
-                _buildTrackingStep('Delivered', activeStep >= 3),
+                Container(
+                  height: 18.w,
+                  width: 18.w,
+                  padding: EdgeInsets.all(2.w),
+                  decoration: BoxDecoration(
+                    color: AppColor.lightGrey.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Image.asset(
+                    imagePath,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                Positioned(
+                  bottom: -5,
+                  right: -5,
+                  child: Container(
+                    height: 7.w,
+                    width: 7.w,
+                    decoration: BoxDecoration(
+                      color: statusColor,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColor.white, width: 2),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: AppColor.white,
+                      size: 12,
+                    ),
+                  ),
+                ),
               ],
             ),
-          ]
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTrackingStep(String title, bool isActive) {
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isActive ? AppColor.appColor1 : AppColor.lightGrey,
+            4.width,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        orderId,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: AppColor.appDarkColor,
+                        ),
+                      ),
+                      Text(
+                        'Rs. ${totalAmount.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          color: AppColor.appColor1,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  0.5.height,
+                  Text(
+                    '$itemsCount Items · $date',
+                    style: TextStyle(color: AppColor.grey, fontSize: 12),
+                  ),
+                  1.height,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          status,
+                          style: TextStyle(
+                            color: statusColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Iconsax.arrow_right_3_outline,
+                        size: 14,
+                        color: AppColor.lightGrey,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          1.height,
-          Text(
-            title,
-            style: TextStyle(fontSize: 10, color: isActive ? AppColor.black : AppColor.grey, fontWeight: isActive ? FontWeight.bold : FontWeight.normal),
-            textAlign: TextAlign.center,
-          ),
-        ],
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildTrackingLine(bool isActive) {
-    return Container(
-      width: 20,
-      height: 2,
-      color: isActive ? AppColor.appColor1 : AppColor.lightGrey,
-      margin: const EdgeInsets.only(bottom: 15),
     );
   }
 }
-

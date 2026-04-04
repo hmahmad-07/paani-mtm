@@ -2,15 +2,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:paani/core/utils/utils.dart';
 import '../../core/resources/app_colors.dart';
 import '../../core/extensions/sizer.dart';
 import '../../core/extensions/routes.dart';
 import '../view/auth/change_password_view.dart';
+import '../view/orders/order_tracking_view.dart';
 import '../view/settings/privacy_policy_view.dart';
 import '../view/settings/terms_conditions_view.dart';
 import '../view/auth/login_view.dart';
 import '../view/profile/profile_view.dart';
+import '../view/dashboard/dashboard_view.dart';
+import '../view/settings/support_view.dart';
+import '../view/settings/about_us_view.dart';
+import '../view/settings/contact_us_view.dart';
 
 class AppDrawer extends StatelessWidget {
   final Function(int)? onTabSelected;
@@ -42,18 +46,6 @@ class AppDrawer extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 35,
-                    backgroundColor: AppColor.appDarkColor,
-                    child: Text(
-                      Utils.getInitials("John Doe"),
-                      style: TextStyle(
-                        color: AppColor.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
                   2.height,
                   Text(
                     "Welcome!",
@@ -88,6 +80,34 @@ class AppDrawer extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    _sectionLabel("Navigation"),
+                    customTile(
+                      context: context,
+                      icon: Iconsax.home_bold,
+                      title: "Home",
+                      onTap: () {
+                        AppRoutes.pop();
+                        if (onTabSelected != null) {
+                          onTabSelected!(0);
+                        } else {
+                          AppRoutes.pushAndRemoveAll(
+                            const DashboardView(initialIndex: 0),
+                          );
+                        }
+                      },
+                    ),
+                    customTile(
+                      context: context,
+                      icon: Iconsax.box_bold,
+                      title: "My Orders",
+                      onTap: () {
+                        AppRoutes.pop();
+                        AppRoutes.push(
+                          const OrderTrackingView(isStandalone: true),
+                        );
+                      },
+                    ),
+
                     _sectionLabel("Account"),
                     customTile(
                       context: context,
@@ -105,6 +125,35 @@ class AppDrawer extends StatelessWidget {
                       onTap: () {
                         AppRoutes.pop();
                         AppRoutes.push(const ChangePasswordView());
+                      },
+                    ),
+                    customTile(
+                      context: context,
+                      icon: Iconsax.headphone_bold,
+                      title: "Support",
+                      onTap: () {
+                        AppRoutes.pop();
+                        AppRoutes.push(const SupportView());
+                      },
+                    ),
+
+                    _sectionLabel("Company"),
+                    customTile(
+                      context: context,
+                      icon: Iconsax.info_circle_bold,
+                      title: "About Us",
+                      onTap: () {
+                        AppRoutes.pop();
+                        AppRoutes.push(const AboutUsView());
+                      },
+                    ),
+                    customTile(
+                      context: context,
+                      icon: Iconsax.headphone_bold,
+                      title: "Contact Us",
+                      onTap: () {
+                        AppRoutes.pop();
+                        AppRoutes.push(const ContactUsView());
                       },
                     ),
 
@@ -127,21 +176,14 @@ class AppDrawer extends StatelessWidget {
                         AppRoutes.push(const TermsConditionsView());
                       },
                     ),
-
-                    15.height,
+                    1.height,
+                    Divider(color: AppColor.lightGrey),
                     customTile(
                       context: context,
                       clr2: AppColor.appDarkColor,
                       icon: Iconsax.logout_bold,
                       title: "Logout",
                       onTap: () => logOut(context),
-                    ),
-                    customTile(
-                      context: context,
-                      clr2: Colors.red,
-                      icon: CupertinoIcons.delete_solid,
-                      title: "Delete Account",
-                      onTap: () => deleteAccount(context),
                     ),
                     20.height,
                   ],
@@ -178,10 +220,10 @@ class AppDrawer extends StatelessWidget {
   }) {
     return ListTile(
       dense: true,
-      visualDensity: const VisualDensity(vertical: -1),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      visualDensity: const VisualDensity(vertical: -4),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15),
       leading: Container(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
           color: clr2.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
@@ -192,8 +234,8 @@ class AppDrawer extends StatelessWidget {
         title,
         style: TextStyle(
           color: AppColor.black,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
+          fontSize: 4.2.sp,
+          fontWeight: FontWeight.bold,
         ),
       ),
       onTap: onTap,
@@ -218,35 +260,6 @@ class AppDrawer extends StatelessWidget {
               AppRoutes.pushAndRemoveAll(const LoginView());
             },
             child: const Text("Logout", style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void deleteAccount(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColor.white,
-        title: const Text(
-          "Delete Account?",
-          style: TextStyle(color: Colors.red),
-        ),
-        content: const Text(
-          "This action cannot be undone. All your data will be permanently deleted.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              AppRoutes.pushAndRemoveAll(const LoginView());
-            },
-            child: const Text("Delete", style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

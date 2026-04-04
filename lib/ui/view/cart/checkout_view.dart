@@ -99,7 +99,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                                 ),
                               ),
                               Text(
-                                '\$${cartVC.totalAmount.toStringAsFixed(2)}',
+                                'Rs. ${cartVC.totalAmount.toStringAsFixed(2)}',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: AppColor.appDarkColor,
@@ -120,7 +120,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                                 ),
                               ),
                               Text(
-                                '\$2.00',
+                                'Rs. 2.00',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: AppColor.appDarkColor,
@@ -142,7 +142,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                                 ),
                               ),
                               Text(
-                                '\$${(cartVC.totalAmount + 2.0).toStringAsFixed(2)}',
+                                'Rs. ${(cartVC.totalAmount + 2.0).toStringAsFixed(2)}',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w900,

@@ -37,7 +37,7 @@ class Utils {
               child: Text(
                 message,
                 style: TextStyle(
-                  color: AppColor.black,
+                  color: AppColor.appDarkColor,
                   fontSize: 4.2.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -48,6 +48,7 @@ class Utils {
       ),
     );
   }
+
   static String getInitials(String name) {
     if (name.isEmpty) return '??';
     List<String> names = name.split(' ');
