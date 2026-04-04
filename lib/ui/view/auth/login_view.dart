@@ -10,7 +10,7 @@ import 'package:paani/ui/view/auth/forgot_password_view.dart';
 import 'package:paani/ui/view/auth/user_signup_view.dart';
 import 'package:provider/provider.dart';
 import '../../../core/controllers/auth_controller.dart';
-import '../home/home_view.dart';
+import '../dashboard/dashboard_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -103,7 +103,7 @@ class _LoginViewState extends State<LoginView> {
                   buttonColor: AppColor.appColor1,
                   isLoading: authVC.isLoading,
                   onPress: () async {
-                    AppRoutes.pushAndRemoveAll(HomeView());
+                    AppRoutes.pushAndRemoveAll(const DashboardView());
                   },
                 ),
                 3.height,

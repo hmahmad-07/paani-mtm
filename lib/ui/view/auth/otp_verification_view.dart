@@ -7,7 +7,7 @@ import '../../../core/controllers/auth_controller.dart';
 import '../../../core/extensions/routes.dart';
 import '../../../core/extensions/sizer.dart';
 import '../../../core/resources/app_colors.dart';
-import 'change_password_view.dart';
+import 'reset_password_view.dart';
 
 class OTPView extends StatefulWidget {
   final String email;
@@ -126,7 +126,7 @@ class _OTPViewState extends State<OTPView> {
                       onCompleted: (pin) {
                         // authVC.verifyOTP(context, widget.email);
                         AppRoutes.pushReplacement(
-                          ChangePasswordView(
+                          ResetPasswordView(
                             email: 'example@gmail.com',
                             otp: '1234',
                           ),

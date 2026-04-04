@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:paani/core/extensions/routes.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:paani/core/extensions/sizer.dart';
 import 'package:paani/core/resources/app_colors.dart';
 import 'package:paani/ui/components/custom_field.dart';
 import 'package:paani/ui/components/custom_button.dart';
-import 'package:paani/ui/components/custom_appbar.dart';
 import 'package:provider/provider.dart';
 import '../../../core/controllers/auth_controller.dart';
+import 'login_view.dart';
 
-class ChangePasswordView extends StatefulWidget {
-  const ChangePasswordView({super.key});
+class ResetPasswordView extends StatefulWidget {
+  final String email;
+  final String otp;
+  const ResetPasswordView({super.key, required this.email, required this.otp});
 
   @override
-  State<ChangePasswordView> createState() => _ChangePasswordViewState();
+  State<ResetPasswordView> createState() => _ResetPasswordViewState();
 }
 
-class _ChangePasswordViewState extends State<ChangePasswordView> {
+class _ResetPasswordViewState extends State<ResetPasswordView> {
   late AuthController authVC;
 
   @override
@@ -28,9 +31,6 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.white,
-      appBar: const CustomAppBar(
-        title: 'Change Password',
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
@@ -39,7 +39,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
             children: [
               5.height,
               Text(
-                'Change Password',
+                'Reset Password',
                 style: TextStyle(
                   color: AppColor.black,
                   fontSize: 8.sp,
@@ -56,22 +56,6 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                 ),
               ),
               10.height,
-
-              CustomField(
-                controller: TextEditingController(),
-                hintText: 'Old Password',
-                obscureText: authVC.isObscured,
-                suffixIcon: GestureDetector(
-                  onTap: () {
-                    authVC.setObscure(!authVC.isObscured);
-                  },
-                  child: Icon(
-                    size: 20,
-                    authVC.isObscured ? Bootstrap.eye_slash : Bootstrap.eye,
-                    color: AppColor.darkGrey,
-                  ),
-                ),
-              ),
 
               CustomField(
                 controller: authVC.newPasswordController,
@@ -108,41 +92,11 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
 
               RoundButton(
                 width: double.maxFinite,
-                title: 'Change Password',
+                title: 'Reset Password',
                 buttonColor: AppColor.appColor1,
                 isLoading: authVC.isLoading,
                 onPress: () async {
-                  // final newPass = authVC.newPasswordController.text.trim();
-                  // final confirmPass = authVC.confirmPasswordController.text
-                  //     .trim();
-
-                  // if (newPass.isEmpty || confirmPass.isEmpty) {
-                  //   Utils.showSnackBar(context, 'Please fill all fields');
-                  //   return;
-                  // }
-
-                  // if (newPass.length < 8) {
-                  //   Utils.showSnackBar(
-                  //     context,
-                  //     'Password must be at least 8 characters',
-                  //   );
-                  //   return;
-                  // }
-
-                  // if (newPass != confirmPass) {
-                  //   Utils.showSnackBar(
-                  //     context,
-                  //     'Password and Confirm Password do not match',
-                  //   );
-                  //   return;
-                  // }
-                  // await authVC.changePassword(
-                  //   context,
-                  //   widget.email,
-                  //   widget.otp,
-                  // );
-
-                  Navigator.pop(context);
+                  AppRoutes.pushAndRemoveAll(const LoginView());
                 },
               ),
             ],

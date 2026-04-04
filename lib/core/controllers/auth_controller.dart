@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../ui/view/auth/login_view.dart';
 import '../constants/app_constants.dart';
 import '../models/user_profile_model.dart';
+import '../resources/app_colors.dart';
 import '../utils/utils.dart';
 
 class AuthController extends ChangeNotifier {
@@ -457,7 +458,7 @@ class AuthController extends ChangeNotifier {
         Utils.showSnackBar(context, data['message'] ?? 'OTP verified');
 
         AppRoutes.pushReplacement(
-          ChangePasswordView(email: email, otp: pinController.text),
+          const ChangePasswordView(),
         );
 
         pinController.clear();
@@ -673,9 +674,10 @@ class AuthController extends ChangeNotifier {
             borderRadius: BorderRadius.circular(10),
             boxShadow: [
               BoxShadow(
-                color: Colors.black26,
-                blurRadius: 10,
-                offset: Offset(0, 4),
+                color: AppColor.grey.withValues(alpha: .1),
+                blurRadius: 3,
+                spreadRadius: 2,
+                offset: const Offset(0, .3),
               ),
             ],
           ),

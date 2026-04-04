@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:paani/core/controllers/auth_controller.dart';
 import 'package:paani/ui/view/splash_view.dart';
 import 'package:provider/provider.dart';
+import 'core/controllers/cart_controller.dart';
 import 'core/extensions/routes.dart';
 import 'core/extensions/sizer.dart';
 import 'core/resources/app_colors.dart';
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthController(), lazy: true),
         ChangeNotifierProvider(create: (_) => ThemeManager()),
+        ChangeNotifierProvider(create: (_) => CartController(), lazy: true),
       ],
       child: Consumer<ThemeManager>(
         builder: (context, themeManager, _) {

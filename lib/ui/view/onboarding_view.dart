@@ -33,9 +33,6 @@ class OnboardingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SizeConfig.init(context);
-    final double imageHeight = 45.h;
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -48,7 +45,7 @@ class OnboardingView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: imageHeight,
+              height: 45.h,
               width: double.infinity,
               child: ClipPath(
                 clipper: _BottomCurveClipper(),

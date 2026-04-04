@@ -30,45 +30,48 @@ class RoundButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: isLoading ? null : onPress,
-      style: ElevatedButton.styleFrom(
-        elevation: elevation,
-        padding: EdgeInsets.zero,
-        backgroundColor: buttonColor,
-        shadowColor: AppColor.grey,
-        overlayColor: AppColor.black.withValues(alpha: .1),
-        surfaceTintColor: AppColor.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(buttonRadius),
+    return SizedBox(
+      width: width,
+      height: height,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPress,
+        style: ElevatedButton.styleFrom(
+          elevation: elevation,
+          padding: EdgeInsets.zero,
+          backgroundColor: buttonColor,
+          shadowColor: AppColor.grey,
+          overlayColor: AppColor.black.withValues(alpha: .1),
+          surfaceTintColor: AppColor.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(buttonRadius),
+          ),
         ),
-        fixedSize: Size(width, height),
-      ),
-      child: isLoading
-          ? SizedBox(
-              height: 22,
-              width: 22,
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: AppColor.appColor1,
-                  strokeWidth: 2,
-                ),
-              ),
-            )
-          : FittedBox(
-              fit: BoxFit.scaleDown,
-              child:
-                  child ??
-                  Text(
-                    maxLines: 1,
-                    title ?? '',
-                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: textColor ?? Colors.white,
-                      fontSize: 5.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
+        child: isLoading
+            ? SizedBox(
+                height: 22,
+                width: 22,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: AppColor.appColor1,
+                    strokeWidth: 2,
                   ),
-            ),
+                ),
+              )
+            : FittedBox(
+                fit: BoxFit.scaleDown,
+                child:
+                    child ??
+                    Text(
+                      maxLines: 1,
+                      title ?? '',
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        color: textColor ?? Colors.white,
+                        fontSize: 5.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+              ),
+      ),
     );
   }
 }
