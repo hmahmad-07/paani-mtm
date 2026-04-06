@@ -10,7 +10,8 @@ import 'package:paani/ui/view/auth/change_password_view.dart';
 import 'package:paani/ui/view/auth/otp_verification_view.dart';
 import 'package:paani/ui/view/home/home_view.dart';
 import 'package:paani/ui/view/splash_view.dart';
-import 'package:latlong_to_place/latlong_to_place.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../ui/view/auth/login_view.dart';
@@ -457,9 +458,7 @@ class AuthController extends ChangeNotifier {
 
         Utils.showSnackBar(context, data['message'] ?? 'OTP verified');
 
-        AppRoutes.pushReplacement(
-          const ChangePasswordView(),
-        );
+        AppRoutes.pushReplacement(const ChangePasswordView());
 
         pinController.clear();
         pinFocusNode.unfocus();
@@ -559,7 +558,10 @@ class AuthController extends ChangeNotifier {
 
   var isLoadingAddress = false;
 
-  Future<void> getAddress({required BuildContext context}) async {
+  Future<void> getAddress({
+    required BuildContext context,
+    TextEditingController? controller,
+  }) async {
     try {
       isLoadingAddress = true;
       notifyListeners();
@@ -588,12 +590,37 @@ class AuthController extends ChangeNotifier {
 
       loadingDialog(context);
 
-      final service = GeocodingService();
-      PlaceInfo place = await service.getCurrentPlaceInfo();
+      Position position = await Geolocator.getCurrentPosition();
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
 
-      if (!hasListeners) return;
+      if (placemarks.isEmpty) {
+        throw Exception("No address found for this location");
+      }
 
-      userAddressController.text = place.formattedAddress;
+      Placemark place = placemarks[0];
+      List<String> addressParts = [];
+      if (place.subLocality != null && place.subLocality!.isNotEmpty) {
+        addressParts.add(place.subLocality!);
+      }
+      if (place.locality != null && place.locality!.isNotEmpty) {
+        addressParts.add(place.locality!);
+      }
+      if (place.administrativeArea != null &&
+          place.administrativeArea!.isNotEmpty) {
+        addressParts.add(place.administrativeArea!);
+      }
+      if (place.country != null && place.country!.isNotEmpty) {
+        addressParts.add(place.country!);
+      }
+      String cleanAddress = addressParts.join(', ');
+      if (cleanAddress.isEmpty) {
+        cleanAddress = "${place.street ?? ''} ${place.locality ?? ''}".trim();
+      }
+
+      (controller ?? userAddressController).text = cleanAddress;
     } catch (e) {
       debugPrint("Error fetching location: $e");
     } finally {

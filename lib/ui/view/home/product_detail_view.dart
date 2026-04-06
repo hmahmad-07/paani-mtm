@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:paani/core/utils/utils.dart';
 import 'package:paani/ui/view/dashboard/dashboard_view.dart';
 import 'package:provider/provider.dart';
@@ -176,20 +177,76 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                             textColor: AppColor.white,
                             title: 'Add to Cart',
                             onPress: () {
-                              for (var i = 0; i < _quantity; i++) {
-                                cartVC.addToCart(widget.product);
+                              if (widget.product.id == '2') {
+                                showModalBottomSheet(
+                                  context: context,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) => Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(25),
+                                      ),
+                                    ),
+                                    padding: EdgeInsets.all(6.w),
+                                    child: SingleChildScrollView(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            'Select Order Type',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColor.appDarkColor,
+                                            ),
+                                          ),
+                                          .5.h.height,
+                                          _buildSelectionOption(
+                                            title: 'New Order (Bottle + Water)',
+                                            subtitle:
+                                                'Rs. ${widget.product.price.toStringAsFixed(0)}',
+                                            icon: Iconsax.box_add_bold,
+                                            onTap: () {
+                                              cartVC.addToCart(
+                                                widget.product,
+                                                isRefill: false,
+                                                quantity: _quantity,
+                                              );
+                                              AppRoutes.pop();
+                                              _showSuccessAndNavigate(context);
+                                            },
+                                          ),
+                                          .2.h.height,
+                                          _buildSelectionOption(
+                                            title: 'Refill (Water Only)',
+                                            subtitle:
+                                                'Rs. ${widget.product.refillPrice?.toStringAsFixed(0)}',
+                                            icon: Iconsax.refresh_bold,
+                                            onTap: () {
+                                              cartVC.addToCart(
+                                                widget.product,
+                                                isRefill: true,
+                                                quantity: _quantity,
+                                              );
+                                              AppRoutes.pop();
+                                              _showSuccessAndNavigate(context);
+                                            },
+                                          ),
+                                          .2.h.height,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                cartVC.addToCart(
+                                  widget.product,
+                                  isRefill: false,
+                                  quantity: _quantity,
+                                );
+                                _showSuccessAndNavigate(context);
                               }
-                              Utils.showSnackBar(
-                                context,
-                                '$_quantity x ${widget.product.name} added to cart!',
-                              );
-                              AppRoutes.push(
-                                Scaffold(
-                                  backgroundColor: AppColor.white,
-                                  appBar: const CustomAppBar(title: 'My Cart'),
-                                  body: const CartView(),
-                                ),
-                              );
                             },
                           ),
                         ),
@@ -201,6 +258,74 @@ class _ProductDetailViewState extends State<ProductDetailView> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildSelectionOption({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(15),
+      child: Container(
+        padding: EdgeInsets.all(4.w),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColor.lightGrey.withValues(alpha: 0.5)),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(2.w),
+              decoration: BoxDecoration(
+                color: AppColor.appColor2.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: AppColor.appColor1),
+            ),
+            4.width,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: AppColor.appColor1,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, size: 14),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSuccessAndNavigate(BuildContext context) {
+    Utils.showSnackBar(
+      context,
+      '$_quantity x ${widget.product.name} added to cart!',
+    );
+    AppRoutes.push(
+      Scaffold(
+        backgroundColor: AppColor.white,
+        appBar: const CustomAppBar(title: 'My Cart'),
+        body: const CartView(),
       ),
     );
   }

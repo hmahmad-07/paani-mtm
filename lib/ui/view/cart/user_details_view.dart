@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:icons_plus/icons_plus.dart';
+import 'package:paani/core/constants/app_constants.dart';
+import 'package:paani/core/controllers/auth_controller.dart';
 import 'package:paani/core/utils/utils.dart';
 import 'package:paani/ui/components/intl_phone_field.dart';
+import 'package:provider/provider.dart';
 import '../../../core/resources/app_colors.dart';
 import '../../../core/extensions/sizer.dart';
 import '../../../core/extensions/routes.dart';
@@ -21,10 +25,19 @@ class _UserDetailsViewState extends State<UserDetailsView> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
-  final TextEditingController quantityController = TextEditingController(
-    text: '1',
-  );
   final TextEditingController noteController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final user = Constants.currentUser;
+    if (user != null) {
+      nameController.text = user.name;
+      emailController.text = user.email;
+      phoneController.text = user.phoneNumber;
+      addressController.text = user.address;
+    }
+  }
 
   @override
   void dispose() {
@@ -32,7 +45,6 @@ class _UserDetailsViewState extends State<UserDetailsView> {
     phoneController.dispose();
     emailController.dispose();
     addressController.dispose();
-    quantityController.dispose();
     noteController.dispose();
     super.dispose();
   }
@@ -86,16 +98,21 @@ class _UserDetailsViewState extends State<UserDetailsView> {
                   controller: addressController,
                   hintText: 'Complete Address',
                   keyType: TextInputType.streetAddress,
-                ),
-                CustomField(
-                  controller: quantityController,
-                  hintText: 'Quantity',
-                  keyType: TextInputType.number,
+                  suffixIcon: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      context.read<AuthController>().getAddress(
+                        context: context,
+                        controller: addressController,
+                      );
+                    },
+                    child: Icon(Bootstrap.geo_alt_fill, color: AppColor.red),
+                  ),
                 ),
                 CustomField(
                   controller: noteController,
                   hintText: 'Additional Note (Optional)',
-                  maxLine: 3,
+                  maxLine: 7,
                 ),
                 10.height,
                 RoundButton(
@@ -110,7 +127,6 @@ class _UserDetailsViewState extends State<UserDetailsView> {
                     AppRoutes.push(const CheckoutView());
                   },
                 ),
-                10.height,
               ],
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/extensions/sizer.dart';
 import '../../components/custom_appbar.dart';
 
 class PrivacyPolicyView extends StatelessWidget {
@@ -8,13 +9,10 @@ class PrivacyPolicyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Privacy Policy',
-      ),
+      appBar: const CustomAppBar(title: 'Privacy Policy'),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Text(
-          '''
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+        child: Text('''
 Privacy Policy
 
 1. Introduction
@@ -34,9 +32,7 @@ We take reasonable measures to help protect data about you from loss, theft, mis
 
 6. Changes to Policy
 We may change this privacy policy from time to time.
-          ''',
-          style: const TextStyle(fontSize: 14, height: 1.5),
-        ),
+          ''', style: TextStyle(fontSize: 5.sp, height: 1.5)),
       ),
     );
   }

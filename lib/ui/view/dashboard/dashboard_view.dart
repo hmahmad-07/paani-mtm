@@ -60,7 +60,7 @@ class _DashboardViewState extends State<DashboardView> {
       left: 10.w,
       right: 10.w,
       child: Container(
-        height: 8.h,
+        height: 8.4.h,
         decoration: BoxDecoration(
           color: AppColor.appDarkColor,
           borderRadius: BorderRadius.circular(30),
@@ -128,7 +128,7 @@ class _DashboardViewState extends State<DashboardView> {
                       physics: const NeverScrollableScrollPhysics(),
                       child: Column(
                         children: [
-                          0.2.height,
+                          0.1.height,
                           Text(
                             label,
                             style: TextStyle(

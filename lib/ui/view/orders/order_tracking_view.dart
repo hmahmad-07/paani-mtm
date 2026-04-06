@@ -150,43 +150,19 @@ class OrderTrackingView extends StatelessWidget {
           ],
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Container(
-                  height: 18.w,
-                  width: 18.w,
-                  padding: EdgeInsets.all(2.w),
-                  decoration: BoxDecoration(
-                    color: AppColor.lightGrey.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Image.asset(
-                    imagePath,
-                    fit: BoxFit.contain,
-                  ),
+            Container(
+              height: 35.w,
+              width: 35.w,
+              decoration: BoxDecoration(
+                color: AppColor.lightGrey.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(15),
+                image: DecorationImage(
+                  fit: BoxFit.contain,
+                  image: AssetImage(imagePath),
                 ),
-                Positioned(
-                  bottom: -5,
-                  right: -5,
-                  child: Container(
-                    height: 7.w,
-                    width: 7.w,
-                    decoration: BoxDecoration(
-                      color: statusColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColor.white, width: 2),
-                    ),
-                    child: Icon(
-                      icon,
-                      color: AppColor.white,
-                      size: 12,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
             4.width,
             Expanded(
@@ -196,55 +172,96 @@ class OrderTrackingView extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        orderId,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: AppColor.appDarkColor,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          orderId,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: AppColor.appDarkColor,
+                          ),
                         ),
                       ),
-                      Text(
-                        'Rs. ${totalAmount.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          color: AppColor.appColor1,
-                          fontSize: 14,
+                      2.width,
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              status,
+                              style: TextStyle(
+                                color: statusColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  0.5.height,
-                  Text(
-                    '$itemsCount Items · $date',
-                    style: TextStyle(color: AppColor.grey, fontSize: 12),
+                  0.2.h.height,
+                  Row(
+                    children: [
+                      Icon(
+                        Iconsax.calendar_1_bold,
+                        size: 14,
+                        color: AppColor.appColor2,
+                      ),
+                      0.5.w.width,
+                      Text(
+                        date,
+                        style: TextStyle(color: AppColor.grey, fontSize: 12),
+                      ),
+                    ],
                   ),
-                  1.height,
+                  0.1.h.height,
+                  Row(
+                    children: [
+                      Icon(
+                        Iconsax.box_1_bold,
+                        size: 14,
+                        color: AppColor.appColor2,
+                      ),
+                      0.5.w.width,
+                      Text(
+                        '$itemsCount Items',
+                        style: TextStyle(color: AppColor.grey, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                  .3.h.height,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          status,
-                          style: TextStyle(
-                            color: statusColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                          ),
+                      Text(
+                        'Rs. ${totalAmount.toStringAsFixed(0)}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          color: AppColor.appColor1,
+                          fontSize: 16,
                         ),
                       ),
-                      Icon(
-                        Iconsax.arrow_right_3_outline,
-                        size: 14,
-                        color: AppColor.lightGrey,
+                      Container(
+                        padding: EdgeInsets.all(1.w),
+                        decoration: BoxDecoration(
+                          color: AppColor.lightGrey.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Iconsax.arrow_right_3_outline,
+                          size: 14,
+                          color: AppColor.appColor1,
+                        ),
                       ),
                     ],
                   ),

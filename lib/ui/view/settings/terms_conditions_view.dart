@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/extensions/sizer.dart';
 import '../../components/custom_appbar.dart';
 
 class TermsConditionsView extends StatelessWidget {
@@ -8,13 +9,10 @@ class TermsConditionsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Terms & Conditions',
-      ),
+      appBar: const CustomAppBar(title: 'Terms & Conditions'),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Text(
-          '''
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+        child: Text('''
 Terms & Conditions
 
 1. Acceptance of Terms
@@ -28,9 +26,7 @@ You agree to use the services only for purposes that are permitted by (a) the Te
 
 4. Limitation of Liability
 Subject to overall provision in paragraph above, you expressly understand and agree that we shall not be liable to you for any direct, indirect, incidental, special consequential or exemplary damages which may be incurred by you.
-          ''',
-          style: const TextStyle(fontSize: 14, height: 1.5),
-        ),
+          ''', style: TextStyle(fontSize: 5.sp, height: 1.5)),
       ),
     );
   }

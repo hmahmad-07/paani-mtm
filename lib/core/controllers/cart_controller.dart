@@ -9,7 +9,6 @@ class CartController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Dummy Products for Home View
   final List<ProductModel> products = [
     ProductModel(
       id: '1',
@@ -26,6 +25,7 @@ class CartController extends ChangeNotifier {
           'Our large 19-litre dispenser bottle is the ultimate hydration solution for families and corporate offices. Sourced from natural springs and rigorously tested for purity, it provides an uninterrupted supply of crystal clear water. Designed to fit perfectly on any standard hot and cold water dispenser. Delivered directly to your doorstep with guaranteed seal protection.',
       imagePath: 'assets/19-litr-bottle.webp',
       price: 8.0,
+      refillPrice: 3.5,
     ),
     ProductModel(
       id: '3',
@@ -62,50 +62,55 @@ class CartController extends ChangeNotifier {
   double get totalAmount {
     double total = 0.0;
     _cartItems.forEach((key, cartItem) {
-      total += cartItem.product.price * cartItem.quantity;
+      final itemPrice = (cartItem.isRefill && cartItem.product.refillPrice != null)
+          ? cartItem.product.refillPrice!
+          : cartItem.product.price;
+      total += itemPrice * cartItem.quantity;
     });
     return total;
   }
 
-  void addToCart(ProductModel product) {
-    if (_cartItems.containsKey(product.id)) {
-      _cartItems[product.id]!.quantity += 1;
+  void addToCart(ProductModel product, {bool isRefill = false, int quantity = 1}) {
+    // Unique key for cart items based on product ID and refill status
+    final cartKey = isRefill ? '${product.id}_refill' : product.id;
+
+    if (_cartItems.containsKey(cartKey)) {
+      _cartItems[cartKey]!.quantity += quantity;
     } else {
-      _cartItems.putIfAbsent(product.id, () => CartItem(product: product));
+      _cartItems.putIfAbsent(
+        cartKey,
+        () => CartItem(product: product, quantity: quantity, isRefill: isRefill),
+      );
     }
     notifyListeners();
   }
 
-  void removeFromCart(String productId) {
-    _cartItems.remove(productId);
+  void removeFromCart(String cartKey) {
+    _cartItems.remove(cartKey);
     notifyListeners();
   }
 
-  void incrementQuantity(String productId) {
-    if (_cartItems.containsKey(productId)) {
-      _cartItems[productId]!.quantity += 1;
+  void incrementQuantity(String cartKey) {
+    if (_cartItems.containsKey(cartKey)) {
+      _cartItems[cartKey]!.quantity += 1;
       notifyListeners();
-    } else {
-      // If attempting to increment from home but it isn't in cart, add it.
-      final prod = products.firstWhere((p) => p.id == productId);
-      addToCart(prod);
     }
   }
 
-  void decrementQuantity(String productId) {
-    if (_cartItems.containsKey(productId)) {
-      if (_cartItems[productId]!.quantity > 1) {
-        _cartItems[productId]!.quantity -= 1;
+  void decrementQuantity(String cartKey) {
+    if (_cartItems.containsKey(cartKey)) {
+      if (_cartItems[cartKey]!.quantity > 1) {
+        _cartItems[cartKey]!.quantity -= 1;
       } else {
-        _cartItems.remove(productId);
+        _cartItems.remove(cartKey);
       }
       notifyListeners();
     }
   }
 
-  int getQuantity(String productId) {
-    if (_cartItems.containsKey(productId)) {
-      return _cartItems[productId]!.quantity;
+  int getQuantity(String cartKey) {
+    if (_cartItems.containsKey(cartKey)) {
+      return _cartItems[cartKey]!.quantity;
     }
     return 0;
   }

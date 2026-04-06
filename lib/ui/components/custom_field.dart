@@ -76,6 +76,7 @@ class CustomField extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
           decoration: InputDecoration(
+            alignLabelWithHint: maxLine > 1,
             visualDensity: VisualDensity(vertical: -1),
 
             prefixIcon: prefix == null

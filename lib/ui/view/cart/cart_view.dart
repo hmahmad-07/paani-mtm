@@ -49,11 +49,16 @@ class CartView extends StatelessWidget {
                       Expanded(
                         child: ListView.separated(
                           padding: EdgeInsets.fromLTRB(8.w, 2.h, 8.w, 14.h),
-                          itemCount: cartItems.length,
+                          itemCount: cartVC.cartItems.length,
                           separatorBuilder: (context, index) => 2.height,
                           itemBuilder: (context, index) {
-                            final cartItem = cartItems[index];
+                            final cartKey = cartVC.cartItems.keys.elementAt(index);
+                            final cartItem = cartVC.cartItems[cartKey]!;
                             final product = cartItem.product;
+                            final price = (cartItem.isRefill && product.refillPrice != null)
+                                ? product.refillPrice!
+                                : product.price;
+
                             return GestureDetector(
                               onTap: () {
                                 AppRoutes.push(
@@ -109,9 +114,32 @@ class CartView extends StatelessWidget {
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                           ),
+                                          if (cartItem.isRefill) ...[
+                                            0.5.height,
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 6,
+                                                vertical: 2,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: AppColor.appColor2
+                                                    .withValues(alpha: 0.2),
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              child: Text(
+                                                'Refill',
+                                                style: TextStyle(
+                                                  color: AppColor.appColor1,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                           1.height,
                                           Text(
-                                            'Rs. ${product.price.toStringAsFixed(2)}',
+                                            'Rs. ${price.toStringAsFixed(2)}',
                                             style: TextStyle(
                                               fontWeight: FontWeight.w900,
                                               fontSize: 14,
@@ -125,9 +153,9 @@ class CartView extends StatelessWidget {
                                       quantity: cartItem.quantity,
                                       size: 24,
                                       onIncrement: () =>
-                                          cartVC.incrementQuantity(product.id),
+                                          cartVC.incrementQuantity(cartKey),
                                       onDecrement: () =>
-                                          cartVC.decrementQuantity(product.id),
+                                          cartVC.decrementQuantity(cartKey),
                                     ),
                                   ],
                                 ),

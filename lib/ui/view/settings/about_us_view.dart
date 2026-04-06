@@ -12,7 +12,7 @@ class AboutUsView extends StatelessWidget {
       backgroundColor: AppColor.white,
       appBar: const CustomAppBar(title: 'About Us'),
       body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(8.w, 0.h, 8.w, 4.h),
+        padding: EdgeInsets.fromLTRB(8.w, 0.h, 8.w, 2.h),
         child: Column(
           children: [
             Container(

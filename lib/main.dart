@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:paani/core/controllers/auth_controller.dart';
-import 'package:paani/ui/view/splash_view.dart';
 import 'package:provider/provider.dart';
+import 'core/controllers/auth_controller.dart';
 import 'core/controllers/cart_controller.dart';
 import 'core/extensions/routes.dart';
 import 'core/extensions/sizer.dart';
 import 'core/resources/app_colors.dart';
+import 'ui/view/splash_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

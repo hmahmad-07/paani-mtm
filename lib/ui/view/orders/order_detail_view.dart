@@ -97,9 +97,9 @@ class OrderDetailView extends StatelessWidget {
             _buildSection(
               child: Column(
                 children: [
-                  _buildItemRow('1.5 Litre Water Bottle', '2x', 3.00),
+                  _buildItemRow('1.5 Litre Water Bottle', '2x', 240, false),
                   const Divider(height: 30),
-                  _buildItemRow('19 Litre Water Bottle', '1x', 8.00),
+                  _buildItemRow('19 Litre Water Bottle', '1x', 150, true),
                 ],
               ),
             ),
@@ -182,7 +182,7 @@ class OrderDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildItemRow(String name, String qty, double price) {
+  Widget _buildItemRow(String name, String qty, double price, bool isRefill) {
     return Row(
       children: [
         Container(
@@ -193,27 +193,52 @@ class OrderDetailView extends StatelessWidget {
             color: AppColor.lightGrey.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Image.asset('assets/1.5-litr.webp', fit: BoxFit.contain),
+          child: Image.asset(
+            name.contains('19') ? 'assets/19-litr-bottle.webp' : 'assets/1.5-litr.webp',
+            fit: BoxFit.contain,
+          ),
         ),
         4.width,
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                name,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColor.appDarkColor,
-                ),
+              Row(
+                children: [
+                  Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColor.appDarkColor,
+                    ),
+                  ),
+                  if (isRefill) ...[
+                    2.width,
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColor.appColor2.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'Refill',
+                        style: TextStyle(
+                          color: AppColor.appColor1,
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
               Text(qty, style: TextStyle(fontSize: 12, color: AppColor.grey)),
             ],
           ),
         ),
         Text(
-          'Rs. ${price.toStringAsFixed(2)}',
+          'Rs. ${price.toStringAsFixed(0)}',
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,

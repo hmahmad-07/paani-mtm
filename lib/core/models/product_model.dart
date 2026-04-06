@@ -4,6 +4,7 @@ class ProductModel {
   final String description;
   final String imagePath;
   final double price;
+  final double? refillPrice;
 
   ProductModel({
     required this.id,
@@ -11,14 +12,18 @@ class ProductModel {
     required this.description,
     required this.imagePath,
     required this.price,
+    this.refillPrice,
   });
-
-  // Since it's dummy data, we avoid immutability pain for now and let the CartController handle quantity
 }
 
 class CartItem {
   final ProductModel product;
   int quantity;
+  bool isRefill;
 
-  CartItem({required this.product, this.quantity = 1});
+  CartItem({
+    required this.product,
+    this.quantity = 1,
+    this.isRefill = false,
+  });
 }
