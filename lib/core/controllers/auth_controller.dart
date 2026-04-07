@@ -697,7 +697,7 @@ class AuthController extends ChangeNotifier {
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColor.white,
             borderRadius: BorderRadius.circular(10),
             boxShadow: [
               BoxShadow(

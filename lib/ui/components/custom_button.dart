@@ -65,7 +65,7 @@ class RoundButton extends StatelessWidget {
                       maxLines: 1,
                       title ?? '',
                       style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        color: textColor ?? Colors.white,
+                        color: textColor ?? AppColor.white,
                         fontSize: 5.sp,
                         fontWeight: FontWeight.bold,
                       ),

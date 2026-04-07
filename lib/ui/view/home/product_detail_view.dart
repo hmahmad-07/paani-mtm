@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:icons_plus/icons_plus.dart';
 import 'package:paani/core/utils/utils.dart';
 import 'package:paani/ui/view/dashboard/dashboard_view.dart';
 import 'package:provider/provider.dart';
@@ -18,8 +17,13 @@ import '../cart/cart_view.dart';
 
 class ProductDetailView extends StatefulWidget {
   final ProductModel product;
+  final bool isRefill;
 
-  const ProductDetailView({super.key, required this.product});
+  const ProductDetailView({
+    super.key,
+    required this.product,
+    this.isRefill = false,
+  });
 
   @override
   State<ProductDetailView> createState() => _ProductDetailViewState();
@@ -30,6 +34,11 @@ class _ProductDetailViewState extends State<ProductDetailView> {
 
   @override
   Widget build(BuildContext context) {
+    final isRefill = widget.isRefill;
+    final price = isRefill && widget.product.refillPrice != null
+        ? widget.product.refillPrice!
+        : widget.product.price;
+
     return WillPopScope(
       onWillPop: () async {
         AppRoutes.pushAndRemoveAll(const DashboardView(initialIndex: 0));
@@ -48,9 +57,10 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Product Image
                           Container(
                             width: double.infinity,
-                            height: 40.h,
+                            height: 38.h,
                             color: AppColor.lightGrey.withValues(alpha: 0.3),
                             padding: EdgeInsets.all(5.w),
                             child: Image.asset(
@@ -58,11 +68,67 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                               fit: BoxFit.contain,
                             ),
                           ),
+
                           Padding(
                             padding: EdgeInsets.all(5.w),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // Order type badge (for 19L with refill)
+                                if (widget.product.refillPrice != null)
+                                  Container(
+                                    margin: EdgeInsets.only(bottom: 2.h),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: isRefill
+                                          ? AppColor.green.withValues(alpha: 0.1)
+                                          : AppColor.appColor1.withValues(
+                                              alpha: 0.1,
+                                            ),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: isRefill
+                                            ? AppColor.green.withValues(
+                                                alpha: 0.3,
+                                              )
+                                            : AppColor.appColor1.withValues(
+                                                alpha: 0.3,
+                                              ),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          isRefill
+                                              ? Icons.refresh_rounded
+                                              : Icons.inventory_2_rounded,
+                                          size: 14,
+                                          color: isRefill
+                                              ? AppColor.green
+                                              : AppColor.appColor1,
+                                        ),
+                                        6.width,
+                                        Text(
+                                          isRefill
+                                              ? 'Refill — Water Only'
+                                              : 'New Order — Bottle + Water',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: isRefill
+                                                ? AppColor.green
+                                                : AppColor.appColor1,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                // Name and price row
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment:
@@ -80,7 +146,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                                     ),
                                     2.width,
                                     Text(
-                                      'Rs. ${(widget.product.price * _quantity).toStringAsFixed(2)}',
+                                      'Rs. ${(price * _quantity).toStringAsFixed(2)}',
                                       style: TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
@@ -90,6 +156,8 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                                   ],
                                 ),
                                 3.height,
+
+                                // Quantity selector
                                 Row(
                                   children: [
                                     Text(
@@ -119,6 +187,8 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                                   ],
                                 ),
                                 6.height,
+
+                                // Description
                                 Text(
                                   'Description',
                                   style: TextStyle(
@@ -143,6 +213,8 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                       ),
                     ),
                   ),
+
+                  // Bottom action bar
                   Container(
                     padding: EdgeInsets.all(5.w),
                     decoration: BoxDecoration(
@@ -164,9 +236,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                             buttonColor: AppColor.appDarkColor,
                             textColor: AppColor.white,
                             title: 'Back',
-                            onPress: () {
-                              AppRoutes.pop();
-                            },
+                            onPress: () => AppRoutes.pop(),
                           ),
                         ),
                         5.width,
@@ -177,76 +247,12 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                             textColor: AppColor.white,
                             title: 'Add to Cart',
                             onPress: () {
-                              if (widget.product.id == '2') {
-                                showModalBottomSheet(
-                                  context: context,
-                                  backgroundColor: Colors.transparent,
-                                  builder: (context) => Container(
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(25),
-                                      ),
-                                    ),
-                                    padding: EdgeInsets.all(6.w),
-                                    child: SingleChildScrollView(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            'Select Order Type',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColor.appDarkColor,
-                                            ),
-                                          ),
-                                          .5.h.height,
-                                          _buildSelectionOption(
-                                            title: 'New Order (Bottle + Water)',
-                                            subtitle:
-                                                'Rs. ${widget.product.price.toStringAsFixed(0)}',
-                                            icon: Iconsax.box_add_bold,
-                                            onTap: () {
-                                              cartVC.addToCart(
-                                                widget.product,
-                                                isRefill: false,
-                                                quantity: _quantity,
-                                              );
-                                              AppRoutes.pop();
-                                              _showSuccessAndNavigate(context);
-                                            },
-                                          ),
-                                          .2.h.height,
-                                          _buildSelectionOption(
-                                            title: 'Refill (Water Only)',
-                                            subtitle:
-                                                'Rs. ${widget.product.refillPrice?.toStringAsFixed(0)}',
-                                            icon: Iconsax.refresh_bold,
-                                            onTap: () {
-                                              cartVC.addToCart(
-                                                widget.product,
-                                                isRefill: true,
-                                                quantity: _quantity,
-                                              );
-                                              AppRoutes.pop();
-                                              _showSuccessAndNavigate(context);
-                                            },
-                                          ),
-                                          .2.h.height,
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                cartVC.addToCart(
-                                  widget.product,
-                                  isRefill: false,
-                                  quantity: _quantity,
-                                );
-                                _showSuccessAndNavigate(context);
-                              }
+                              cartVC.addToCart(
+                                widget.product,
+                                isRefill: widget.isRefill,
+                                quantity: _quantity,
+                              );
+                              _showSuccessAndNavigate(context);
                             },
                           ),
                         ),
@@ -257,60 +263,6 @@ class _ProductDetailViewState extends State<ProductDetailView> {
               ),
             );
           },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSelectionOption({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(15),
-      child: Container(
-        padding: EdgeInsets.all(4.w),
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColor.lightGrey.withValues(alpha: 0.5)),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(2.w),
-              decoration: BoxDecoration(
-                color: AppColor.appColor2.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: AppColor.appColor1),
-            ),
-            4.width,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: AppColor.appColor1,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios, size: 14),
-          ],
         ),
       ),
     );

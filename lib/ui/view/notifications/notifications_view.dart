@@ -28,7 +28,7 @@ class NotificationsView extends StatelessWidget {
               'time': '2 hours ago',
               'icon': Iconsax.box_tick_bold,
               'isNew': true,
-              'color': Colors.green,
+              'color': AppColor.green,
             },
             {
               'title': 'Out for Delivery',

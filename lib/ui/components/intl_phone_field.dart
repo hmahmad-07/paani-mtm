@@ -170,12 +170,12 @@ class _IntlFieldState extends State<IntlField> {
 
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(3.r),
-              borderSide: BorderSide(color: Colors.red),
+              borderSide: BorderSide(color: AppColor.red),
             ),
 
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(3.r),
-              borderSide: BorderSide(color: Colors.red),
+              borderSide: BorderSide(color: AppColor.red),
             ),
 
             contentPadding: EdgeInsets.symmetric(

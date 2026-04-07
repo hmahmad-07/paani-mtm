@@ -29,14 +29,14 @@ class ContactUsView extends StatelessWidget {
               title: "Phone",
               content: "+92 21 00000000\n+92 300 0000000",
               icon: Iconsax.call_bold,
-              color: Colors.blue,
+              color: AppColor.blue,
             ),
             2.height,
             _buildContactCard(
               title: "Email",
               content: "info@paani.com\nsales@paani.com",
               icon: Iconsax.sms_bold,
-              color: Colors.orange,
+              color: AppColor.orange,
             ),
             2.height,
             _buildContactCard(
@@ -58,11 +58,11 @@ class ContactUsView extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildSocialIcon(Brands.facebook, Colors.blue),
+                _buildSocialIcon(Brands.facebook, AppColor.blue),
                 6.width,
-                _buildSocialIcon(Brands.instagram, Colors.pink),
+                _buildSocialIcon(Brands.instagram, AppColor.pink),
                 6.width,
-                _buildSocialIcon(Brands.twitter, Colors.lightBlue),
+                _buildSocialIcon(Brands.twitter, AppColor.lightBlue),
               ],
             ),
           ],

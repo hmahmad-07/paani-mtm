@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:provider/provider.dart';
 import '../../core/resources/app_colors.dart';
 import '../../core/extensions/sizer.dart';
 import '../../core/extensions/routes.dart';
@@ -175,6 +176,23 @@ class AppDrawer extends StatelessWidget {
                         AppRoutes.push(const TermsConditionsView());
                       },
                     ),
+
+                    _sectionLabel("Settings"),
+                    Consumer<ThemeManager>(
+                      builder: (context, themeManager, _) {
+                        return customTile(
+                          context: context,
+                          icon: themeManager.isSwapped
+                              ? Iconsax.sun_1_bold
+                              : Iconsax.moon_bold,
+                          title: themeManager.isSwapped
+                              ? "Light Mode"
+                              : "Dark Mode",
+                          onTap: () => themeManager.toggleTheme(),
+                        );
+                      },
+                    ),
+
                     1.height,
                     Divider(color: AppColor.lightGrey),
                     customTile(
@@ -184,7 +202,6 @@ class AppDrawer extends StatelessWidget {
                       title: "Logout",
                       onTap: () => logOut(context),
                     ),
-                    20.height,
                   ],
                 ),
               ),
@@ -196,8 +213,8 @@ class AppDrawer extends StatelessWidget {
   }
 
   Widget _sectionLabel(String label) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(15, 5, 15, 7),
       child: Text(
         label.toUpperCase(),
         style: TextStyle(
@@ -215,19 +232,20 @@ class AppDrawer extends StatelessWidget {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
-    Color clr2 = const Color(0xFF0089D8),
+    Color? clr2,
   }) {
+    final effectiveColor = clr2 ?? AppColor.appColor1;
     return ListTile(
       dense: true,
       visualDensity: const VisualDensity(vertical: -4),
       contentPadding: const EdgeInsets.symmetric(horizontal: 15),
       leading: Container(
-        padding: const EdgeInsets.all(5),
+        padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: clr2.withValues(alpha: 0.1),
+          color: effectiveColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, size: 18, color: clr2),
+        child: Icon(icon, size: 15, color: effectiveColor),
       ),
       title: Text(
         title,
@@ -258,7 +276,7 @@ class AppDrawer extends StatelessWidget {
               Navigator.pop(context);
               AppRoutes.pushAndRemoveAll(const LoginView());
             },
-            child: const Text("Logout", style: TextStyle(color: Colors.red)),
+            child: Text("Logout", style: TextStyle(color: AppColor.red)),
           ),
         ],
       ),

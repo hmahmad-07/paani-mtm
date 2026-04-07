@@ -9,6 +9,7 @@ import '../../../core/resources/app_colors.dart';
 import '../../../core/extensions/sizer.dart';
 import '../../../core/extensions/routes.dart';
 import '../../components/custom_button.dart';
+import 'order_type_selection_view.dart';
 import 'product_detail_view.dart';
 
 class HomeView extends StatefulWidget {
@@ -184,11 +185,19 @@ class _HomeViewState extends State<HomeView> {
                                           title: 'Add',
                                           onPress: () {
                                             if (!_isLoading) {
-                                              AppRoutes.push(
-                                                ProductDetailView(
-                                                  product: product,
-                                                ),
-                                              );
+                                              if (product.id == '2') {
+                                                AppRoutes.push(
+                                                  OrderTypeSelectionView(
+                                                    product: product,
+                                                  ),
+                                                );
+                                              } else {
+                                                AppRoutes.push(
+                                                  ProductDetailView(
+                                                    product: product,
+                                                  ),
+                                                );
+                                              }
                                             }
                                           },
                                         ),

@@ -2,15 +2,24 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../extensions/routes.dart';
+import '../../ui/view/splash_view.dart';
 
 class AppColor {
   static Color red = const Color.fromARGB(255, 249, 84, 84);
+  static Color green = const Color(0xFF4CAF50);
+  static Color blue = const Color(0xFF2196F3);
+  static Color orange = const Color(0xFFFF9800);
+  static Color pink = const Color(0xFFE91E63);
+  static Color lightBlue = const Color(0xFF03A9F4);
   static Color lightGrey = const Color(0xFFE3E3E3);
   static Color grey = const Color(0xFF696D75);
   static Color darkGrey = const Color(0xFF4B4B4B);
   static Color appColor1 = const Color(0xFF0089D8);
   static Color appColor2 = const Color.fromARGB(255, 239, 187, 45);
   static Color appDarkColor = const Color(0xFF181E4C);
+  static Color appLightColor = const Color.fromARGB(255, 251, 246, 233);
   static Color black = const Color(0xFF111111);
   static Color white = const Color(0xFFFFFFFF);
   static Color transparent = Colors.transparent;
@@ -23,6 +32,10 @@ class AppColor {
     final tempLight = lightGrey;
     lightGrey = darkGrey;
     darkGrey = tempLight;
+
+    final tempAppDark = appDarkColor;
+    appDarkColor = appLightColor;
+    appLightColor = tempAppDark;
   }
 }
 
@@ -31,10 +44,20 @@ class ThemeManager with ChangeNotifier {
 
   bool get isSwapped => _isSwapped;
 
-  void toggleTheme() {
+  ThemeManager([bool initialSwapped = false]) {
+    if (initialSwapped) {
+      _isSwapped = true;
+      AppColor.swapColors();
+    }
+  }
+
+  Future<void> toggleTheme() async {
     _isSwapped = !_isSwapped;
     AppColor.swapColors();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isSwapped', _isSwapped);
     notifyListeners();
+    AppRoutes.pushAndRemoveAll(const SplashView());
   }
 }
 

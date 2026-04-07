@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../../core/extensions/sizer.dart';
 import '../../components/custom_appbar.dart';
 

@@ -62,8 +62,11 @@ class _SplashViewState extends State<SplashView> {
       body: SafeArea(
         child: Center(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.w),
-            child: Image.asset(ImageAssets.splash),
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            child: ClipRRect(
+              borderRadius: BorderRadiusGeometry.circular(200.r),
+              child: Image.asset(ImageAssets.splash),
+            ),
           ),
         ),
       ),

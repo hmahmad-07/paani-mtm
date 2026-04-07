@@ -63,7 +63,7 @@ class _OTPViewState extends State<OTPView> {
 
     final errorPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
-        border: Border.all(color: Colors.red, width: 2),
+        border: Border.all(color: AppColor.red, width: 2),
       ),
     );
 
@@ -117,7 +117,7 @@ class _OTPViewState extends State<OTPView> {
                       forceErrorState: authVC.errorMessage != null,
                       errorText: authVC.errorMessage,
                       errorTextStyle: TextStyle(
-                        color: Colors.red,
+                        color: AppColor.red,
                         fontSize: 4.sp,
                       ),
                       showCursor: true,

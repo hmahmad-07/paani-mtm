@@ -9,6 +9,7 @@ import 'core/extensions/routes.dart';
 import 'core/extensions/sizer.dart';
 import 'core/resources/app_colors.dart';
 import 'ui/view/splash_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,11 +18,15 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(Phoenix(child: const MyApp()));
+  final prefs = await SharedPreferences.getInstance();
+  final isSwapped = prefs.getBool('isSwapped') ?? false;
+
+  runApp(Phoenix(child: MyApp(isSwapped: isSwapped)));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isSwapped;
+  const MyApp({super.key, required this.isSwapped});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +35,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthController(), lazy: true),
-        ChangeNotifierProvider(create: (_) => ThemeManager()),
+        ChangeNotifierProvider(create: (_) => ThemeManager(isSwapped)),
         ChangeNotifierProvider(create: (_) => CartController()),
       ],
       child: Consumer<ThemeManager>(
