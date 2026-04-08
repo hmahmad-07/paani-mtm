@@ -1,15 +1,21 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:paani/core/extensions/sizer.dart';
 import 'package:paani/core/resources/app_images.dart';
+import 'package:paani/ui/view/dashboard/dashboard_view.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:paani/ui/view/auth/login_view.dart';
 // import 'package:paani/ui/view/home/home_view.dart';
 // import 'package:provider/provider.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 // import '../../core/controllers/auth_controller.dart';
+import '../../core/controllers/auth_controller.dart';
 import '../../core/extensions/routes.dart';
 import '../../core/resources/app_colors.dart';
+import 'auth/login_view.dart';
 import 'onboarding_view.dart';
 
 class SplashView extends StatefulWidget {
@@ -20,40 +26,23 @@ class SplashView extends StatefulWidget {
 }
 
 class _SplashViewState extends State<SplashView> {
-  @override
-  void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkFirstTime();
-    });
-    super.initState();
-  }
-
   Future<void> _checkFirstTime() async {
-    await Future.delayed(const Duration(seconds: 3));
-    AppRoutes.pushReplacement(const OnboardingView());
+    final sp = await SharedPreferences.getInstance();
+
+    final token = sp.getString('token') ?? '';
+    final isFirstTime = sp.getBool('isFirstTime') ?? true;
+
+    if (!mounted) return;
+
+    if (isFirstTime) {
+      AppRoutes.pushReplacement(const OnboardingView());
+    } else if (token.isEmpty) {
+      AppRoutes.pushReplacement(const LoginView());
+    } else {
+      await context.read<AuthController>().loadUserDetail();
+      AppRoutes.pushReplacement(const DashboardView(initialIndex: 0));
+    }
   }
-
-  // Future<void> _checkFirstTime() async {
-  //   final sp = await SharedPreferences.getInstance();
-  //   var token = sp.getString('token') ?? '';
-  //   var isFirstTime = sp.getBool('isFirstTime') ?? true;
-
-  //   await Future.delayed(const Duration(seconds: 3));
-
-  //   if (!mounted) return;
-
-  //   if (isFirstTime) {
-  //     AppRoutes.pushReplacement(const OnboardingView());
-  //   } else if (token.isEmpty) {
-  //     AppRoutes.pushReplacement(const LoginView());
-  //   } else {
-  //     final authController = context.read<AuthController>();
-  //     await authController.getProfile(context, token);
-
-  //     if (!mounted) return;
-  //     AppRoutes.pushReplacement(const HomeView());
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -61,11 +50,39 @@ class _SplashViewState extends State<SplashView> {
       backgroundColor: AppColor.white,
       body: SafeArea(
         child: Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.w),
-            child: ClipRRect(
-              borderRadius: BorderRadiusGeometry.circular(200.r),
-              child: Image.asset(ImageAssets.splash),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Image.asset(ImageAssets.splash, width: 60.w),
+                2.height,
+                SizedBox(
+                  width: double.infinity,
+                  child: DefaultTextStyle(
+                    style: TextStyle(
+                      fontSize: 6.sp,
+                      color: AppColor.appDarkColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    child: Center(
+                      child: AnimatedTextKit(
+                        isRepeatingAnimation: false,
+                        animatedTexts: [
+                          TyperAnimatedText(
+                            'Bottled Drinking Water',
+                            textStyle: TextStyle(
+                              fontSize: 6.sp,
+                              color: AppColor.appDarkColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            speed: const Duration(milliseconds: 150),
+                          ),
+                        ],
+                        onFinished: _checkFirstTime,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

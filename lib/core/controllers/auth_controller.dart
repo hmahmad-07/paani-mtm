@@ -8,7 +8,7 @@ import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:paani/core/extensions/routes.dart';
 import 'package:paani/ui/view/auth/change_password_view.dart';
 import 'package:paani/ui/view/auth/otp_verification_view.dart';
-import 'package:paani/ui/view/home/home_view.dart';
+import 'package:paani/ui/view/dashboard/dashboard_view.dart';
 import 'package:paani/ui/view/splash_view.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -16,7 +16,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../ui/view/auth/login_view.dart';
 import '../constants/app_constants.dart';
-import '../models/user_profile_model.dart';
 import '../resources/app_colors.dart';
 import '../utils/utils.dart';
 
@@ -35,124 +34,6 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ============================================================ Registration ============================================================
-
-  final userNameController = TextEditingController();
-  final userPhoneController = TextEditingController();
-  final userEmailController = TextEditingController();
-  final userAddressController = TextEditingController();
-  final userPasswordController = TextEditingController();
-  final userConfirmPasswordController = TextEditingController();
-
-  Future<void> register(BuildContext context) async {
-    try {
-      isLoading = true;
-      notifyListeners();
-
-      final formData = {
-        'name': userNameController.text.trim(),
-        'phone_number': userPhoneController.text.trim(),
-        'email': userEmailController.text.trim(),
-        'address': userAddressController.text.trim(),
-        'password': userPasswordController.text.trim(),
-        'password_confirmation': userConfirmPasswordController.text.trim(),
-      };
-
-      final dio = Dio();
-      final response = await dio.request(
-        '${Constants.baseUrl}auth/register',
-        options: Options(
-          method: 'POST',
-          headers: {'Accept': 'application/json'},
-        ),
-        queryParameters: formData,
-      );
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-
-        if (data['success'] == true) {
-          Utils.showSnackBar(
-            context,
-            data['message']?.toString() ?? 'Registration successful!',
-          );
-
-          AppRoutes.pushReplacement(LoginView());
-
-          userNameController.clear();
-          userPhoneController.clear();
-          userEmailController.clear();
-          userAddressController.clear();
-          userPasswordController.clear();
-          userConfirmPasswordController.clear();
-        } else {
-          Utils.showSnackBar(
-            context,
-            data['message']?.toString() ??
-                'Registration failed. Please try again',
-          );
-        }
-        log('Registration successful: $data');
-      }
-    } on DioException catch (e) {
-      log('Dio error during registration: ${e.response?.data}');
-
-      final responseData = e.response?.data;
-
-      if (responseData != null && responseData['error'] != null) {
-        final errors = responseData['error'];
-
-        String errorMessage = '';
-
-        if (errors['name'] != null &&
-            errors['name'] is List &&
-            errors['name'].isNotEmpty) {
-          errorMessage = errors['name'][0].toString();
-        } else if (errors['phone_number'] != null &&
-            errors['phone_number'] is List &&
-            errors['phone_number'].isNotEmpty) {
-          errorMessage = errors['phone_number'][0].toString();
-        } else if (errors['email'] != null &&
-            errors['email'] is List &&
-            errors['email'].isNotEmpty) {
-          errorMessage = errors['email'][0].toString();
-        } else if (errors['address'] != null &&
-            errors['address'] is List &&
-            errors['address'].isNotEmpty) {
-          errorMessage = errors['address'][0].toString();
-        } else if (errors['password'] != null &&
-            errors['password'] is List &&
-            errors['password'].isNotEmpty) {
-          errorMessage = errors['password'][0].toString();
-        } else if (errors['password_confirmation'] != null &&
-            errors['password_confirmation'] is List &&
-            errors['password_confirmation'].isNotEmpty) {
-          errorMessage = errors['password_confirmation'][0].toString();
-        }
-
-        if (errorMessage.isNotEmpty) {
-          Utils.showSnackBar(context, errorMessage);
-        } else {
-          Utils.showSnackBar(
-            context,
-            'Registration failed. Please check your input',
-          );
-        }
-      } else {
-        Utils.showSnackBar(context, 'Registration failed. Please try again');
-      }
-    } catch (e) {
-      log('Unexpected error during registration: $e');
-      Utils.showSnackBar(
-        context,
-        'An unexpected error occurred. Please try again',
-      );
-    } finally {
-      isLoading = false;
-      notifyListeners();
-    }
-  }
-
   // ================================================================ Login =================================================================
 
   final emailPhoneController = TextEditingController();
@@ -163,101 +44,21 @@ class AuthController extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      final sp = await SharedPreferences.getInstance();
-
       final formData = {
-        'login': emailPhoneController.text.trim(),
+        'tag': 'login',
+        'email': emailPhoneController.text.trim(),
         'password': passwordController.text.trim(),
       };
 
       final dio = Dio();
-      final response = await dio.request(
-        '${Constants.baseUrl}auth/login',
-        options: Options(
-          method: 'POST',
-          headers: {'Accept': 'application/json'},
-        ),
-        queryParameters: formData,
-      );
 
-      if (response.statusCode == 200) {
-        final data = response.data;
-
-        if (data['success'] == true) {
-          Utils.showSnackBar(
-            context,
-            data['message']?.toString() ?? 'Login successful!',
-          );
-
-          await sp.setString('token', data['data']['token']);
-          Constants.token = sp.getString('token') ?? '';
-
-          await getProfile(context, Constants.token);
-
-          AppRoutes.pushAndRemoveAll(HomeView());
-
-          emailPhoneController.clear();
-          passwordController.clear();
-        } else {
-          Utils.showSnackBar(
-            context,
-            data['message']?.toString() ?? 'Login failed. Please try again',
-          );
-        }
-        log('Login successful: $data');
-      }
-    } on DioException catch (e) {
-      log('Dio error during login: ${e.response?.data}');
-
-      final responseData = e.response?.data;
-
-      if (responseData != null && responseData['error'] != null) {
-        String errorMessage = responseData['error'];
-
-        if (errorMessage.isNotEmpty) {
-          Utils.showSnackBar(context, errorMessage);
-        } else {
-          Utils.showSnackBar(
-            context,
-            'Login failed. Please check your credentials',
-          );
-        }
-      } else if (responseData != null && responseData['message'] != null) {
-        Utils.showSnackBar(context, responseData['message'].toString());
-      } else {
-        Utils.showSnackBar(context, 'Invalid credentials. Please try again');
-      }
-    } catch (e) {
-      log('Unexpected error during login: $e');
-      Utils.showSnackBar(
-        context,
-        'An unexpected error occurred. Please try again',
-      );
-    } finally {
-      isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  // ================================================================ Profile =================================================================
-
-  UserProfileModel? userProfile;
-
-  Future<void> getProfile(BuildContext context, String token) async {
-    try {
-      isLoading = true;
-      notifyListeners();
-
-      log('Token: $token');
-
-      final dio = Dio();
-
-      final response = await dio.get(
-        '${Constants.baseUrl}auth/user',
+      final response = await dio.post(
+        '${Constants.baseUrl}login_api_cspmobile.php',
+        data: formData,
         options: Options(
           headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json',
-            'Authorization': 'Bearer $token',
           },
         ),
       );
@@ -265,27 +66,71 @@ class AuthController extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = response.data;
 
-        userProfile = UserProfileModel.fromJson(data);
+        if (data['error'] == 0) {
+          Utils.showSnackBar(
+            context,
+            data['error_msg']?.toString() ?? 'Login successful!',
+          );
 
-        if (userProfile!.success == true) {
-          Constants.currentUser = userProfile!.data.user;
+          await saveUserData(data);
 
-          log('Profile fetched successfully: ${Constants.currentUser}');
+          AppRoutes.pushAndRemoveAll(DashboardView(initialIndex: 0));
+
+          emailPhoneController.clear();
+          passwordController.clear();
         } else {
-          log('Failed to fetch profile');
-          Utils.showSnackBar(context, 'Failed to fetch profile');
+          Utils.showSnackBar(context, data['error_msg'] ?? 'Login failed');
         }
       }
     } on DioException catch (e) {
-      log('Dio error during profile fetch: ${e.response?.data ?? e.message}');
-      Utils.showSnackBar(context, 'Network error while fetching profile');
+      log('Dio error: ${e.response?.data}');
+
+      Utils.showSnackBar(
+        context,
+        e.response?.data?['error_msg'] ?? 'Login failed. Check credentials',
+      );
     } catch (e) {
-      log('Unexpected error during profile fetch: $e');
+      log('Unexpected error: $e');
+
       Utils.showSnackBar(context, 'Something went wrong');
     } finally {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> saveUserData(Map<String, dynamic> data) async {
+    final sp = await SharedPreferences.getInstance();
+
+    await sp.setString('token', data['token'] ?? '');
+    await sp.setString('entityID', data['ENTITY_NO'] ?? '');
+    await sp.setString('entityName', data['ENTITY_NAME'] ?? '');
+    await sp.setString('phone', data['CELL_NUM'] ?? '');
+    await sp.setString('personName', data['CONTACT_PERSON'] ?? '');
+
+    Constants.token = data['token'] ?? '';
+    Constants.entityID = data['ENTITY_NO'] ?? '';
+    Constants.entityName = data['ENTITY_NAME'] ?? '';
+    Constants.phone = data['CELL_NUM'] ?? '';
+    Constants.personName = data['CONTACT_PERSON'] ?? '';
+
+    await loadUserDetail();
+  }
+
+  Future<void> loadUserDetail() async {
+    final sp = await SharedPreferences.getInstance();
+
+    Constants.token = sp.getString('token') ?? '';
+    Constants.entityID = sp.getString('entityID') ?? '';
+    Constants.entityName = sp.getString('entityName') ?? '';
+    Constants.phone = sp.getString('phone') ?? '';
+    Constants.personName = sp.getString('personName') ?? '';
+
+    log('Token: ${Constants.token}');
+    log('ID: ${Constants.entityID}');
+    log('Entity: ${Constants.entityName}');
+    log('Phone: ${Constants.phone}');
+    log('Name: ${Constants.personName}');
   }
 
   // ================================================================ Forgot Password =================================================================
@@ -537,12 +382,6 @@ class AuthController extends ChangeNotifier {
 
   @override
   void dispose() {
-    userNameController.dispose();
-    userPhoneController.dispose();
-    userEmailController.dispose();
-    userAddressController.dispose();
-    userPasswordController.dispose();
-    userConfirmPasswordController.dispose();
     emailPhoneController.dispose();
     passwordController.dispose();
     forgotPasswordController.dispose();
@@ -620,7 +459,7 @@ class AuthController extends ChangeNotifier {
         cleanAddress = "${place.street ?? ''} ${place.locality ?? ''}".trim();
       }
 
-      (controller ?? userAddressController).text = cleanAddress;
+      controller?.text = cleanAddress;
     } catch (e) {
       debugPrint("Error fetching location: $e");
     } finally {
@@ -641,51 +480,32 @@ class AuthController extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
+      await sp.remove('token');
+      await sp.remove('entityID');
+      await sp.remove('entityName');
+      await sp.remove('phone');
+      await sp.remove('personName');
+
+      Constants.token = '';
+      Constants.entityID = '';
+      Constants.entityName = '';
+      Constants.phone = '';
+      Constants.personName = '';
+
+      AppColor.resetColors();
+      await Phoenix.rebirth(context);
+
       if (!context.mounted) return;
-      loadingDialog(context);
-
-      final token = sp.getString('token') ?? '';
-
-      final dio = Dio();
-
-      final response = await dio.post(
-        '${Constants.baseUrl}auth/logout',
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-        ),
-      );
-
-      if (response.statusCode == 200) {
-        debugPrint("Logout API success: ${response.data}");
-
-        await sp.remove('token');
-        Constants.token = '';
-        Constants.currentUser = null;
-
-        await Phoenix.rebirth(context);
-
-        debugPrint('User credentials cleared from SharedPreferences.');
-
-        if (!context.mounted) return;
-        AppRoutes.pushAndRemoveAll(const SplashView());
-      } else {
-        throw Exception(response.statusMessage ?? "Logout failed");
-      }
+      AppRoutes.pushAndRemoveAll(const SplashView());
     } catch (e) {
       debugPrint('Logout error: $e');
 
       if (context.mounted) {
-        Utils.showSnackBar(context, "Logout failed: $e");
+        Utils.showSnackBar(context, "Logout failed");
       }
     } finally {
       isLoading = false;
       notifyListeners();
-      if (context.mounted && Navigator.canPop(context)) {
-        Navigator.pop(context);
-      }
     }
   }
 

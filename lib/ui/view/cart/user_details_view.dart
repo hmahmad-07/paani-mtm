@@ -30,13 +30,13 @@ class _UserDetailsViewState extends State<UserDetailsView> {
   @override
   void initState() {
     super.initState();
-    final user = Constants.currentUser;
-    if (user != null) {
-      nameController.text = user.name;
-      emailController.text = user.email;
-      phoneController.text = user.phoneNumber;
-      addressController.text = user.address;
-    }
+    // final user = Constants.currentUser;
+    // if (user != null) {
+    //   nameController.text = user.name;
+    //   emailController.text = user.email;
+    //   phoneController.text = user.phoneNumber;
+    //   addressController.text = user.address;
+    // }
   }
 
   @override

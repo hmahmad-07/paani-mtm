@@ -1,7 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:provider/provider.dart';
+import '../../core/controllers/auth_controller.dart';
 import '../../core/resources/app_colors.dart';
 import '../../core/extensions/sizer.dart';
 import '../../core/extensions/routes.dart';
@@ -9,7 +11,6 @@ import '../view/auth/change_password_view.dart';
 import '../view/orders/order_tracking_view.dart';
 import '../view/settings/privacy_policy_view.dart';
 import '../view/settings/terms_conditions_view.dart';
-import '../view/auth/login_view.dart';
 import '../view/profile/profile_view.dart';
 import '../view/dashboard/dashboard_view.dart';
 import '../view/settings/support_view.dart';
@@ -260,23 +261,27 @@ class AppDrawer extends StatelessWidget {
   }
 
   void logOut(BuildContext context) {
-    showDialog(
+    showCupertinoDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColor.white,
+      builder: (context) => CupertinoAlertDialog(
         title: const Text("Logout?"),
-        content: const Text("Are you sure you want to logout?"),
+        content: const Padding(
+          padding: EdgeInsets.only(top: 8.0),
+          child: Text("Are you sure you want to logout?"),
+        ),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () => Navigator.pop(context),
+            isDefaultAction: true,
             child: const Text("Cancel"),
           ),
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () {
               Navigator.pop(context);
-              AppRoutes.pushAndRemoveAll(const LoginView());
+              context.read<AuthController>().logout(context);
             },
-            child: Text("Logout", style: TextStyle(color: AppColor.red)),
+            isDestructiveAction: true,
+            child: const Text("Logout"),
           ),
         ],
       ),

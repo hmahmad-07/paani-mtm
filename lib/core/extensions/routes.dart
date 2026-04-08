@@ -1,6 +1,6 @@
 // ignore_for_file: file_names
 
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class AppRoutes {
   static final GlobalKey<NavigatorState> navigatorKey =
@@ -8,26 +8,26 @@ class AppRoutes {
 
   static Future<dynamic>? push(Widget page) {
     return navigatorKey.currentState?.push(
-      ScalePageRoute(builder: (_) => page),
+      CupertinoPageRoute(builder: (_) => page),
     );
   }
 
   static Future<dynamic>? pushReplacement(Widget page) {
     return navigatorKey.currentState?.pushReplacement(
-      ScalePageRoute(builder: (_) => page),
+      CupertinoPageRoute(builder: (_) => page),
     );
   }
 
   static Future<dynamic>? pushAndRemoveUntil(Widget page) {
     return navigatorKey.currentState?.pushAndRemoveUntil(
-      ScalePageRoute(builder: (_) => page),
+      CupertinoPageRoute(builder: (_) => page),
       (Route<dynamic> route) => route.isFirst,
     );
   }
 
   static Future<dynamic>? pushAndRemoveAll(Widget page) {
     return navigatorKey.currentState?.pushAndRemoveUntil(
-      ScalePageRoute(builder: (_) => page),
+      CupertinoPageRoute(builder: (_) => page),
       (Route<dynamic> route) => false,
     );
   }

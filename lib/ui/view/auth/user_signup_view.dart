@@ -58,25 +58,25 @@ class _UserSignupViewState extends State<UserSignupView> {
                 5.height,
 
                 CustomField(
-                  controller: authVC.userNameController,
+                  controller: TextEditingController(),
                   hintText: 'Full Name',
                   keyType: TextInputType.name,
                 ),
 
                 IntlField(
-                  controller: authVC.userPhoneController,
+                  controller: TextEditingController(),
                   hintText: 'Phone Number',
                   onChanged: (phone) {},
                 ),
 
                 CustomField(
-                  controller: authVC.userEmailController,
+                  controller: TextEditingController(),
                   hintText: 'Email Address',
                   keyType: TextInputType.emailAddress,
                 ),
 
                 CustomField(
-                  controller: authVC.userAddressController,
+                  controller: TextEditingController(),
                   hintText: 'Address',
                   keyType: TextInputType.streetAddress,
                   suffixIcon: GestureDetector(
@@ -88,7 +88,7 @@ class _UserSignupViewState extends State<UserSignupView> {
                 ),
 
                 CustomField(
-                  controller: authVC.userPasswordController,
+                  controller: TextEditingController(),
                   hintText: 'Password',
                   obscureText: authVC.isObscured,
                   suffixIcon: GestureDetector(
@@ -104,7 +104,7 @@ class _UserSignupViewState extends State<UserSignupView> {
                 ),
 
                 CustomField(
-                  controller: authVC.userConfirmPasswordController,
+                  controller: TextEditingController(),
                   hintText: 'Confirm Password',
                   obscureText: authVC.isObscured,
                   suffixIcon: GestureDetector(
