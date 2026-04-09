@@ -20,7 +20,6 @@ Future<void> main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final isSwapped = prefs.getBool('isSwapped') ?? false;
-  AppColor.resetColors();
   runApp(Phoenix(child: MyApp(isSwapped: isSwapped)));
 }
 

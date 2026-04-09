@@ -184,8 +184,8 @@ class AppDrawer extends StatelessWidget {
                         return customTile(
                           context: context,
                           icon: themeManager.isSwapped
-                              ? Iconsax.sun_1_bold
-                              : Iconsax.moon_bold,
+                              ? Icons.light_mode
+                              : Icons.dark_mode,
                           title: themeManager.isSwapped
                               ? "Light Mode"
                               : "Dark Mode",

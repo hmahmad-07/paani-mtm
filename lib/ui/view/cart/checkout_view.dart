@@ -80,11 +80,14 @@ class _CheckoutViewState extends State<CheckoutView> {
                               ...items.asMap().entries.map((entry) {
                                 final idx = entry.key;
                                 final cartItem = entry.value.value;
-                                final itemPrice =
-                                    cartItem.isRefill &&
-                                        cartItem.product.refillPrice != null
-                                    ? cartItem.product.refillPrice!
-                                    : cartItem.product.price;
+                                final product = cartItem.product;
+
+                                // ---------- Raw Map Fields ----------
+                                final String itemName =
+                                    product['ITEM_NAME'] ?? '';
+                                final double price =
+                                    double.tryParse(product['PRICE'] ?? '0') ??
+                                    0.0;
 
                                 return Column(
                                   children: [
@@ -95,6 +98,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                                       ),
                                       child: Row(
                                         children: [
+                                          // ---- Product Image ----
                                           Container(
                                             height: 14.w,
                                             width: 14.w,
@@ -107,19 +111,21 @@ class _CheckoutViewState extends State<CheckoutView> {
                                             child: Padding(
                                               padding: EdgeInsets.all(1.w),
                                               child: Image.asset(
-                                                cartItem.product.imagePath,
+                                                'assets/19-litr-bottle.webp', // default — replace with Image.network when real URL comes
                                                 fit: BoxFit.contain,
                                               ),
                                             ),
                                           ),
                                           3.width,
+
+                                          // ---- Product Info ----
                                           Expanded(
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  cartItem.product.name,
+                                                  itemName,
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.w700,
                                                     fontSize: 13,
@@ -164,6 +170,8 @@ class _CheckoutViewState extends State<CheckoutView> {
                                               ],
                                             ),
                                           ),
+
+                                          // ---- Quantity & Price ----
                                           Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.end,
@@ -176,7 +184,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                                                 ),
                                               ),
                                               Text(
-                                                'Rs. ${(itemPrice * cartItem.quantity).toStringAsFixed(0)}',
+                                                'Rs. ${(price * cartItem.quantity).toStringAsFixed(0)}',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.w800,
                                                   color: AppColor.appColor1,
@@ -218,7 +226,6 @@ class _CheckoutViewState extends State<CheckoutView> {
                                 'Delivery Fee',
                                 'Rs. ${deliveryFee.toStringAsFixed(0)}',
                               ),
-
                               Divider(height: 3.h, color: AppColor.lightGrey),
                               Row(
                                 mainAxisAlignment:
@@ -286,6 +293,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                   ),
                 ),
 
+                // ---- Confirm Button ----
                 Container(
                   padding: EdgeInsets.fromLTRB(8.w, 2.h, 8.w, 2.h),
                   decoration: BoxDecoration(

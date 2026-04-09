@@ -492,7 +492,6 @@ class AuthController extends ChangeNotifier {
       Constants.phone = '';
       Constants.personName = '';
 
-      AppColor.resetColors();
       await Phoenix.rebirth(context);
 
       if (!context.mounted) return;

@@ -1,11 +1,10 @@
 // ignore_for_file: file_names
 
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:paani/core/extensions/routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../extensions/routes.dart';
+import '../../ui/view/splash_view.dart';
 
 class AppColor {
   static Color red = const Color.fromARGB(255, 249, 84, 84);
@@ -38,15 +37,6 @@ class AppColor {
     appDarkColor = appLightColor;
     appLightColor = tempAppDark;
   }
-
-  static void resetColors() {
-    white = const Color(0xFFFFFFFF);
-    black = const Color(0xFF111111);
-    lightGrey = const Color(0xFFE3E3E3);
-    darkGrey = const Color(0xFF4B4B4B);
-    appDarkColor = const Color(0xFF181E4C);
-    appLightColor = const Color.fromARGB(255, 251, 246, 233);
-  }
 }
 
 class ThemeManager with ChangeNotifier {
@@ -59,16 +49,15 @@ class ThemeManager with ChangeNotifier {
       _isSwapped = true;
       AppColor.swapColors();
     }
-    log('ThemeManager after swap — white is now: ${AppColor.white}');
   }
 
   Future<void> toggleTheme() async {
     _isSwapped = !_isSwapped;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isSwapped', _isSwapped);
-    AppColor.resetColors();
+    AppColor.swapColors();
+    AppRoutes.pushAndRemoveAll(const SplashView());
     notifyListeners();
-    await Phoenix.rebirth(AppRoutes.navigatorKey.currentContext!);
   }
 }
 

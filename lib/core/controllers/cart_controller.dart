@@ -1,6 +1,22 @@
+import 'dart:developer';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import '../models/product_model.dart';
+import '../constants/app_constants.dart';
 
+// ============================================================
+//  Cart Item - API Based (No ProductModel)
+// ============================================================
+class CartItem {
+  final Map<String, dynamic> product;
+  int quantity;
+  bool isRefill;
+
+  CartItem({required this.product, this.quantity = 1, this.isRefill = false});
+}
+
+// ============================================================
+//  Cart Controller
+// ============================================================
 class CartController extends ChangeNotifier {
   bool homeLoaded = false;
 
@@ -9,114 +25,129 @@ class CartController extends ChangeNotifier {
     notifyListeners();
   }
 
-  final List<ProductModel> products = [
-    ProductModel(
-      id: '1',
-      name: '1.5 Litre Water Bottle',
-      description:
-          'Premium purified drinking water in a highly portable 1.5-litre bottle. Treated with reverse osmosis and rich in essential minerals, this water delivers a crisp and refreshing taste. Perfect for gym sessions, travel, or just keeping at your desk to ensure you stay fully hydrated throughout your busy day. The bottle is 100% recyclable.',
-      imagePath: 'assets/1.5-litr.webp',
-      price: 1.5,
-    ),
-    ProductModel(
-      id: '2',
-      name: '19 Litre Water Bottle',
-      description:
-          'Our large 19-litre dispenser bottle is the ultimate hydration solution for families and corporate offices. Sourced from natural springs and rigorously tested for purity, it provides an uninterrupted supply of crystal clear water. Designed to fit perfectly on any standard hot and cold water dispenser. Delivered directly to your doorstep with guaranteed seal protection.',
-      imagePath: 'assets/19-litr-bottle.webp',
-      price: 8.0,
-      refillPrice: 3.5,
-    ),
-    ProductModel(
-      id: '3',
-      name: '200 ml Water Cup',
-      description:
-          'Convenient 200 ml disposable water cups, ideal for large gatherings, corporate events, weddings, or quick single servings. Manufactured under strict hygiene standards and sealed securely to prevent any contamination before use. Compact form factor makes it incredibly easy to distribute among crowds without fuss or spillage.',
-      imagePath: 'assets/200-ml-Cup.webp',
-      price: 0.3,
-    ),
-    ProductModel(
-      id: '4',
-      name: '500 ml Water Bottle',
-      description:
-          'Handy 500 ml mineral water bottle for quick on-the-go refreshment. Whether you are running errands, packing lunch for the kids, or taking a short walk, this compact bottle slips easily into any bag or cup holder. Every drop is UV treated and mineralized to provide maximum vitality.',
-      imagePath: 'assets/500-ml.webp',
-      price: 0.8,
-    ),
-    ProductModel(
-      id: '5',
-      name: '6 Litre Water Bottle',
-      description:
-          'The 6-litre family utility bottle strikes the perfect balance between high capacity and manageability. Ideal for small families, camping trips, or weekend getaways. It features a sturdy, ergonomic built-in handle for easy pouring and carrying. Enjoy premium filtered drinking water wherever you are without committing to the heavy 19-litre jug.',
-      imagePath: 'assets/6-litr-bottle.webp',
-      price: 3.5,
-    ),
-  ];
+  // ================================================================ Products =================================================================
 
-  final Map<String, CartItem> _cartItems = {};
+  List<Map<String, dynamic>> productList = [];
+  bool isLoadingProducts = false;
 
-  Map<String, CartItem> get cartItems => _cartItems;
+  Future<void> fetchProducts() async {
+    try {
+      isLoadingProducts = true;
+      notifyListeners();
 
-  int get itemQuantity => _cartItems.length;
+      final dio = Dio();
+
+      final response = await dio.request(
+        '${Constants.baseUrl}itemlist_cspmobile.php?id=${Constants.entityID}',
+        options: Options(
+          method: 'GET',
+          headers: {'Accept': 'application/json'},
+        ),
+      );
+
+      log(response.toString());
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+
+        if (data['error'] == 0) {
+          final List rawList = data['products'];
+
+          productList = rawList.map((item) {
+            return <String, dynamic>{
+              'ENTITY_NO': item['ENTITY_NO']?.toString() ?? '',
+              'ITEM_ID': item['ITEM_ID']?.toString() ?? '',
+              'ITEM_NAME': item['ITEM_NAME']?.toString() ?? '',
+              'DESCRIPTION': item['DESCRIPTION']?.toString() ?? '',
+              'IMAGE_URL': item['IMAGE_URL']?.toString() ?? '',
+              'PRICE': item['PRICE']?.toString() ?? '0',
+              'STOCK_QTY': item['STOCK_QTY']?.toString() ?? '0',
+            };
+          }).toList();
+
+          log('Products loaded: ${productList.length}');
+        } else {
+          log('Products error: ${data['error_msg']}');
+          productList = [];
+        }
+      }
+    } on DioException catch (e) {
+      log('Dio error fetching products: ${e.response?.data}');
+      productList = [];
+    } catch (e) {
+      log('Unexpected error fetching products: $e');
+      productList = [];
+    } finally {
+      isLoadingProducts = false;
+      notifyListeners();
+    }
+  }
+
+  // ================================================================ Cart =================================================================
+
+  final Map<String, CartItem> cartItems = {};
+
+  int get itemQuantity => cartItems.length;
 
   double get totalAmount {
     double total = 0.0;
-    _cartItems.forEach((key, cartItem) {
-      final itemPrice = (cartItem.isRefill && cartItem.product.refillPrice != null)
-          ? cartItem.product.refillPrice!
-          : cartItem.product.price;
-      total += itemPrice * cartItem.quantity;
+    cartItems.forEach((key, cartItem) {
+      final double price =
+          double.tryParse(cartItem.product['PRICE'] ?? '0') ?? 0.0;
+      total += price * cartItem.quantity;
     });
     return total;
   }
 
-  void addToCart(ProductModel product, {bool isRefill = false, int quantity = 1}) {
-    // Unique key for cart items based on product ID and refill status
-    final cartKey = isRefill ? '${product.id}_refill' : product.id;
+  void addToCart(
+    Map<String, dynamic> product, {
+    bool isRefill = false,
+    int quantity = 1,
+  }) {
+    final String itemId = product['ITEM_ID'] ?? '';
+    final cartKey = isRefill ? '${itemId}_refill' : itemId;
 
-    if (_cartItems.containsKey(cartKey)) {
-      _cartItems[cartKey]!.quantity += quantity;
+    if (cartItems.containsKey(cartKey)) {
+      cartItems[cartKey]!.quantity += quantity;
     } else {
-      _cartItems.putIfAbsent(
+      cartItems.putIfAbsent(
         cartKey,
-        () => CartItem(product: product, quantity: quantity, isRefill: isRefill),
+        () =>
+            CartItem(product: product, quantity: quantity, isRefill: isRefill),
       );
     }
     notifyListeners();
   }
 
   void removeFromCart(String cartKey) {
-    _cartItems.remove(cartKey);
+    cartItems.remove(cartKey);
     notifyListeners();
   }
 
   void incrementQuantity(String cartKey) {
-    if (_cartItems.containsKey(cartKey)) {
-      _cartItems[cartKey]!.quantity += 1;
+    if (cartItems.containsKey(cartKey)) {
+      cartItems[cartKey]!.quantity += 1;
       notifyListeners();
     }
   }
 
   void decrementQuantity(String cartKey) {
-    if (_cartItems.containsKey(cartKey)) {
-      if (_cartItems[cartKey]!.quantity > 1) {
-        _cartItems[cartKey]!.quantity -= 1;
+    if (cartItems.containsKey(cartKey)) {
+      if (cartItems[cartKey]!.quantity > 1) {
+        cartItems[cartKey]!.quantity -= 1;
       } else {
-        _cartItems.remove(cartKey);
+        cartItems.remove(cartKey);
       }
       notifyListeners();
     }
   }
 
   int getQuantity(String cartKey) {
-    if (_cartItems.containsKey(cartKey)) {
-      return _cartItems[cartKey]!.quantity;
-    }
-    return 0;
+    return cartItems[cartKey]?.quantity ?? 0;
   }
 
   void clearCart() {
-    _cartItems.clear();
+    cartItems.clear();
     notifyListeners();
   }
 }

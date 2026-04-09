@@ -1,11 +1,10 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:paani/core/utils/utils.dart';
 import 'package:paani/ui/view/dashboard/dashboard_view.dart';
 import 'package:provider/provider.dart';
-
-import '../../../core/models/product_model.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import '../../../core/controllers/cart_controller.dart';
 import '../../../core/resources/app_colors.dart';
 import '../../../core/extensions/sizer.dart';
@@ -16,7 +15,7 @@ import '../../components/item_stepper.dart';
 import '../cart/cart_view.dart';
 
 class ProductDetailView extends StatefulWidget {
-  final ProductModel product;
+  final Map<String, dynamic> product;
   final bool isRefill;
 
   const ProductDetailView({
@@ -34,10 +33,11 @@ class _ProductDetailViewState extends State<ProductDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    final isRefill = widget.isRefill;
-    final price = isRefill && widget.product.refillPrice != null
-        ? widget.product.refillPrice!
-        : widget.product.price;
+    final String itemName = widget.product['ITEM_NAME'] ?? '';
+    final String description = widget.product['DESCRIPTION'] ?? '';
+    final String imageUrl = widget.product['IMAGE_URL'] ?? '';
+    final double price = double.tryParse(widget.product['PRICE'] ?? '0') ?? 0.0;
+    final bool isRefill = widget.isRefill;
 
     return WillPopScope(
       onWillPop: () async {
@@ -46,7 +46,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
       },
       child: Scaffold(
         backgroundColor: AppColor.white,
-        appBar: CustomAppBar(title: widget.product.name),
+        appBar: CustomAppBar(title: itemName),
         body: Consumer<CartController>(
           builder: (context, cartVC, child) {
             return SafeArea(
@@ -57,15 +57,35 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Product Image
                           Container(
                             width: double.infinity,
                             height: 38.h,
                             color: AppColor.lightGrey.withValues(alpha: 0.3),
                             padding: EdgeInsets.all(5.w),
-                            child: Image.asset(
-                              widget.product.imagePath,
+                            child: CachedNetworkImage(
+                              imageUrl: imageUrl,
                               fit: BoxFit.contain,
+                              placeholder: (context, url) => Skeletonizer(
+                                enabled: true,
+                                effect: ShimmerEffect(
+                                  baseColor: AppColor.lightGrey.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  highlightColor: AppColor.white.withValues(
+                                    alpha: 0.8,
+                                  ),
+                                ),
+                                child: Container(
+                                  color: AppColor.lightGrey.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Icon(
+                                Icons.image_not_supported_outlined,
+                                color: AppColor.grey,
+                                size: 40,
+                              ),
                             ),
                           ),
 
@@ -74,8 +94,8 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Order type badge (for 19L with refill)
-                                if (widget.product.refillPrice != null)
+                                // ---- Refill Badge ----
+                                if (isRefill)
                                   Container(
                                     margin: EdgeInsets.only(bottom: 2.h),
                                     padding: const EdgeInsets.symmetric(
@@ -83,52 +103,38 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                                       vertical: 6,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: isRefill
-                                          ? AppColor.green.withValues(alpha: 0.1)
-                                          : AppColor.appColor1.withValues(
-                                              alpha: 0.1,
-                                            ),
+                                      color: AppColor.green.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
-                                        color: isRefill
-                                            ? AppColor.green.withValues(
-                                                alpha: 0.3,
-                                              )
-                                            : AppColor.appColor1.withValues(
-                                                alpha: 0.3,
-                                              ),
+                                        color: AppColor.green.withValues(
+                                          alpha: 0.3,
+                                        ),
                                       ),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Icon(
-                                          isRefill
-                                              ? Icons.refresh_rounded
-                                              : Icons.inventory_2_rounded,
+                                          Icons.refresh_rounded,
                                           size: 14,
-                                          color: isRefill
-                                              ? AppColor.green
-                                              : AppColor.appColor1,
+                                          color: AppColor.green,
                                         ),
                                         6.width,
                                         Text(
-                                          isRefill
-                                              ? 'Refill — Water Only'
-                                              : 'New Order — Bottle + Water',
+                                          'Refill — Water Only',
                                           style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
-                                            color: isRefill
-                                                ? AppColor.green
-                                                : AppColor.appColor1,
+                                            color: AppColor.green,
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
 
-                                // Name and price row
+                                // ---- Name & Price ----
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment:
@@ -136,7 +142,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        widget.product.name,
+                                        itemName,
                                         style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.w800,
@@ -157,7 +163,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                                 ),
                                 3.height,
 
-                                // Quantity selector
+                                // ---- Quantity Selector ----
                                 Row(
                                   children: [
                                     Text(
@@ -172,15 +178,11 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                                     ItemStepper(
                                       quantity: _quantity,
                                       onIncrement: () {
-                                        setState(() {
-                                          _quantity++;
-                                        });
+                                        setState(() => _quantity++);
                                       },
                                       onDecrement: () {
                                         if (_quantity > 1) {
-                                          setState(() {
-                                            _quantity--;
-                                          });
+                                          setState(() => _quantity--);
                                         }
                                       },
                                     ),
@@ -188,7 +190,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                                 ),
                                 6.height,
 
-                                // Description
+                                // ---- Description ----
                                 Text(
                                   'Description',
                                   style: TextStyle(
@@ -199,7 +201,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                                 ),
                                 2.height,
                                 Text(
-                                  widget.product.description,
+                                  description,
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: AppColor.darkGrey,
@@ -214,7 +216,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                     ),
                   ),
 
-                  // Bottom action bar
+                  // ---- Bottom Action Bar ----
                   Container(
                     padding: EdgeInsets.all(5.w),
                     decoration: BoxDecoration(
@@ -252,7 +254,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                                 isRefill: widget.isRefill,
                                 quantity: _quantity,
                               );
-                              _showSuccessAndNavigate(context);
+                              _showSuccessAndNavigate(context, itemName);
                             },
                           ),
                         ),
@@ -268,11 +270,8 @@ class _ProductDetailViewState extends State<ProductDetailView> {
     );
   }
 
-  void _showSuccessAndNavigate(BuildContext context) {
-    Utils.showSnackBar(
-      context,
-      '$_quantity x ${widget.product.name} added to cart!',
-    );
+  void _showSuccessAndNavigate(BuildContext context, String itemName) {
+    // Utils.showSnackBar(context, '$_quantity x $itemName added to cart!');
     AppRoutes.push(
       Scaffold(
         backgroundColor: AppColor.white,
