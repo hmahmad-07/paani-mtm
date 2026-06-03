@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -19,6 +20,12 @@ class CartItem {
 // ============================================================
 class CartController extends ChangeNotifier {
   bool homeLoaded = false;
+  bool isPlacingOrder = false;
+
+  void setPlacingOrder(bool value) {
+    isPlacingOrder = value;
+    notifyListeners();
+  }
 
   void setHomeLoaded() {
     homeLoaded = true;
@@ -33,19 +40,22 @@ class CartController extends ChangeNotifier {
   Future<void> fetchProducts() async {
     try {
       isLoadingProducts = true;
-      notifyListeners();
 
       final dio = Dio();
 
+      var url =
+          '${Constants.baseUrl}itemlist_cspmobile.php?id=${Constants.entityID}';
+
       final response = await dio.request(
-        '${Constants.baseUrl}itemlist_cspmobile.php?id=${Constants.entityID}',
+        url,
         options: Options(
           method: 'GET',
           headers: {'Accept': 'application/json'},
         ),
       );
 
-      log(response.toString());
+      log('URL: $url');
+      log('Response: $response');
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -149,5 +159,58 @@ class CartController extends ChangeNotifier {
   void clearCart() {
     cartItems.clear();
     notifyListeners();
+  }
+
+  // ================================================================ Place Order =================================================================
+
+  Future<bool> placeOrder() async {
+    try {
+      setPlacingOrder(true);
+
+      final List<Map<String, dynamic>> orderItems = cartItems.values.map((
+        item,
+      ) {
+        final product = item.product;
+        return {
+          'item_id': int.tryParse(product['ITEM_ID']?.toString() ?? '0') ?? 0,
+          'item_name': product['ITEM_NAME'],
+          'price': double.tryParse(product['PRICE']?.toString() ?? '0') ?? 0.0,
+          'quantity': item.quantity,
+        };
+      }).toList();
+
+      final String itemsJson = json.encode(orderItems);
+
+      final formDataMap = {
+        'is_external_client': '1',
+        'entity_no': Constants.entityID,
+        'created_at': DateTime.now().toIso8601String(),
+        'items': itemsJson,
+      };
+
+      log('Order Payload: $formDataMap');
+
+      final dio = Dio();
+      final data = FormData.fromMap(formDataMap);
+
+      final response = await dio.request(
+        '${Constants.baseUrl}submit_visit_order.php',
+        options: Options(method: 'POST'),
+        data: data,
+      );
+
+      log('Order Response: ${response.data}');
+
+      if (response.statusCode == 200) {
+        clearCart();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      log('Error placing order: $e');
+      return false;
+    } finally {
+      setPlacingOrder(false);
+    }
   }
 }

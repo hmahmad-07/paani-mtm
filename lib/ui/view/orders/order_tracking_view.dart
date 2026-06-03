@@ -1,18 +1,38 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:provider/provider.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/controllers/order_controller.dart';
+import '../../../core/controllers/cart_controller.dart';
+import '../../../core/models/order_model.dart';
 import '../../../core/resources/app_colors.dart';
 import '../../../core/extensions/sizer.dart';
 import '../../../core/extensions/routes.dart';
 import '../../components/custom_appbar.dart';
 import 'order_detail_view.dart';
 
-class OrderTrackingView extends StatelessWidget {
+class OrderTrackingView extends StatefulWidget {
   final bool isStandalone;
   const OrderTrackingView({super.key, this.isStandalone = false});
 
   @override
+  State<OrderTrackingView> createState() => _OrderTrackingViewState();
+}
+
+class _OrderTrackingViewState extends State<OrderTrackingView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrderController>().fetchOrders(Constants.entityID);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (isStandalone) {
+    if (widget.isStandalone) {
       return Scaffold(
         backgroundColor: AppColor.white,
         appBar: const CustomAppBar(title: 'My Orders'),
@@ -23,116 +43,90 @@ class OrderTrackingView extends StatelessWidget {
   }
 
   Widget _buildBody() {
-    return Container(
-      color: AppColor.white,
-      height: double.infinity,
-      width: double.infinity,
-      child: ListView(
-        padding: EdgeInsets.fromLTRB(8.w, 2.h, 8.w, isStandalone ? 4.h : 14.h),
-        children: [
-          _buildOrderCard(
-            orderId: '#ORD-987654',
-            date: '04 Apr, 10:30 AM',
-            status: 'Out for Delivery',
-            itemsCount: 3,
-            totalAmount: 18.50,
-            statusColor: AppColor.appColor2,
-            icon: Iconsax.truck_fast_outline,
-            imagePath: 'assets/1.5-litr.webp',
+    return Consumer2<OrderController, CartController>(
+      builder: (context, orderVC, cartVC, child) {
+        if (orderVC.isLoading && orderVC.orders.isEmpty) {
+          return Skeletonizer(
+            enabled: true,
+            child: ListView.builder(
+              padding: EdgeInsets.fromLTRB(
+                8.w,
+                2.h,
+                8.w,
+                widget.isStandalone ? 4.h : 14.h,
+              ),
+              itemCount: 5,
+              itemBuilder: (context, index) => _buildOrderCard(
+                order: Order(
+                  id: '0000',
+                  entityNo: '',
+                  entityName: '',
+                  isProductive: true,
+                  orderDate: 'Loading...',
+                  createdAt: '',
+                  items: [],
+                ),
+                cartVC: cartVC,
+              ),
+            ),
+          );
+        }
+
+        if (orderVC.orders.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Iconsax.box_outline, size: 64, color: AppColor.grey),
+                2.height,
+                Text(
+                  'No orders found',
+                  style: TextStyle(color: AppColor.grey, fontSize: 16),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: () => orderVC.fetchOrders(Constants.entityID),
+          child: ListView.builder(
+            padding: EdgeInsets.fromLTRB(
+              8.w,
+              2.h,
+              8.w,
+              widget.isStandalone ? 4.h : 14.h,
+            ),
+            itemCount: orderVC.orders.length,
+            itemBuilder: (context, index) {
+              final order = orderVC.orders[index];
+              return _buildOrderCard(order: order, cartVC: cartVC);
+            },
           ),
-          2.height,
-          _buildOrderCard(
-            orderId: '#ORD-987123',
-            date: '01 Apr, 02:15 PM',
-            status: 'Delivered',
-            itemsCount: 1,
-            totalAmount: 3.50,
-            statusColor: AppColor.green,
-            icon: Iconsax.box_tick_outline,
-            imagePath: 'assets/19-litr-bottle.webp',
-          ),
-          2.height,
-          _buildOrderCard(
-            orderId: '#ORD-986001',
-            date: '28 Mar, 09:00 AM',
-            status: 'Cancelled',
-            itemsCount: 5,
-            totalAmount: 25.00,
-            statusColor: AppColor.red,
-            icon: Iconsax.box_remove_outline,
-            imagePath: 'assets/200-ml-Cup.webp',
-          ),
-          2.height,
-          _buildOrderCard(
-            orderId: '#ORD-985900',
-            date: '25 Mar, 11:20 AM',
-            status: 'Delivered',
-            itemsCount: 2,
-            totalAmount: 10.00,
-            statusColor: AppColor.green,
-            icon: Iconsax.box_tick_outline,
-            imagePath: 'assets/500-ml.webp',
-          ),
-          2.height,
-          _buildOrderCard(
-            orderId: '#ORD-985880',
-            date: '22 Mar, 04:45 PM',
-            status: 'Delivered',
-            itemsCount: 4,
-            totalAmount: 14.20,
-            statusColor: AppColor.green,
-            icon: Iconsax.box_tick_outline,
-            imagePath: 'assets/6-litr-bottle.webp',
-          ),
-          2.height,
-          _buildOrderCard(
-            orderId: '#ORD-985777',
-            date: '20 Mar, 08:30 AM',
-            status: 'Pending',
-            itemsCount: 1,
-            totalAmount: 5.00,
-            statusColor: AppColor.grey,
-            icon: Iconsax.clock_outline,
-            imagePath: 'assets/1.5-litr.webp',
-          ),
-          2.height,
-          _buildOrderCard(
-            orderId: '#ORD-985666',
-            date: '18 Mar, 01:10 PM',
-            status: 'Delivered',
-            itemsCount: 6,
-            totalAmount: 42.00,
-            statusColor: AppColor.green,
-            icon: Iconsax.box_tick_outline,
-            imagePath: 'assets/19-litr-bottle.webp',
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildOrderCard({
-    required String orderId,
-    required String date,
-    required String status,
-    required int itemsCount,
-    required double totalAmount,
-    required Color statusColor,
-    required IconData icon,
-    required String imagePath,
+    required Order order,
+    required CartController cartVC,
   }) {
+    // Get images for items
+    List<String> imageUrls = [];
+    for (var item in order.items) {
+      final product = cartVC.productList.firstWhere(
+        (p) => p['ITEM_ID'].toString() == item.itemId,
+        orElse: () => {},
+      );
+      if (product.isNotEmpty && product['IMAGE_URL'] != null) {
+        imageUrls.add(product['IMAGE_URL']);
+      }
+    }
+
     return GestureDetector(
       onTap: () {
-        AppRoutes.push(
-          OrderDetailView(
-            orderId: orderId,
-            date: date,
-            status: status,
-            totalAmount: totalAmount,
-            statusColor: statusColor,
-            imagePath: imagePath,
-          ),
-        );
+        AppRoutes.push(OrderDetailView(order: order));
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 0.8.h),
@@ -152,64 +146,76 @@ class OrderTrackingView extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 35.w,
-              width: 32.w,
-              decoration: BoxDecoration(
-                color: AppColor.lightGrey.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(15),
-                image: DecorationImage(
-                  fit: BoxFit.fill,
-                  image: AssetImage(imagePath),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  height: 35.w,
+                  width: 32.w,
+                  decoration: BoxDecoration(
+                    color: AppColor.lightGrey.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: imageUrls.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: imageUrls.first,
+                            fit: BoxFit.contain,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            errorWidget: (context, url, error) => Image.asset(
+                              'assets/1.5-litr.webp',
+                              fit: BoxFit.fill,
+                            ),
+                          )
+                        : Image.asset('assets/1.5-litr.webp', fit: BoxFit.fill),
+                  ),
                 ),
-              ),
+                if (order.items.length > 1)
+                  Positioned(
+                    top: -5,
+                    right: -5,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppColor.appColor1,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        '${order.items.length}',
+                        style: TextStyle(
+                          color: AppColor.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             4.width,
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          orderId,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: AppColor.appDarkColor,
-                          ),
-                        ),
-                      ),
-                      2.width,
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              status,
-                              style: TextStyle(
-                                color: statusColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                  Text(
+                    '#ORD-${order.id}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: AppColor.appDarkColor,
+                    ),
                   ),
-                  0.2.h.height,
+                  1.height,
                   Row(
                     children: [
                       Icon(
@@ -219,7 +225,7 @@ class OrderTrackingView extends StatelessWidget {
                       ),
                       0.5.w.width,
                       Text(
-                        date,
+                        order.orderDate,
                         style: TextStyle(color: AppColor.grey, fontSize: 12),
                       ),
                     ],
@@ -234,7 +240,7 @@ class OrderTrackingView extends StatelessWidget {
                       ),
                       0.5.w.width,
                       Text(
-                        '$itemsCount Items',
+                        '${order.items.length} Items',
                         style: TextStyle(color: AppColor.grey, fontSize: 12),
                       ),
                     ],
@@ -244,7 +250,7 @@ class OrderTrackingView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Rs. ${totalAmount.toStringAsFixed(0)}',
+                        'Rs. ${order.totalAmount.toStringAsFixed(0)}',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           color: AppColor.appColor1,

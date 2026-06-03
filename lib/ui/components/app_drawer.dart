@@ -2,20 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:paani/core/constants/app_constants.dart';
+import 'package:paani/core/utils/utils.dart';
 import 'package:provider/provider.dart';
 import '../../core/controllers/auth_controller.dart';
 import '../../core/resources/app_colors.dart';
 import '../../core/extensions/sizer.dart';
 import '../../core/extensions/routes.dart';
-import '../view/auth/change_password_view.dart';
-import '../view/orders/order_tracking_view.dart';
+import '../view/settings/support_view.dart';
 import '../view/settings/privacy_policy_view.dart';
 import '../view/settings/terms_conditions_view.dart';
-import '../view/profile/profile_view.dart';
-import '../view/dashboard/dashboard_view.dart';
-import '../view/settings/support_view.dart';
-import '../view/settings/about_us_view.dart';
-import '../view/settings/contact_us_view.dart';
 
 class AppDrawer extends StatelessWidget {
   final Function(int)? onTabSelected;
@@ -51,24 +47,27 @@ class AppDrawer extends StatelessWidget {
                   Text(
                     "Welcome!",
                     style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 5.sp,
+                      fontWeight: FontWeight.normal,
                       color: AppColor.white.withValues(alpha: 0.9),
                     ),
                   ),
-                  Text(
-                    'John Doe',
-                    style: TextStyle(
-                      color: AppColor.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      Constants.entityName,
+                      style: TextStyle(
+                        color: AppColor.white,
+                        fontSize: 6.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   Text(
-                    'johndoe@example.com',
+                    Constants.phone,
                     style: TextStyle(
                       color: AppColor.white.withValues(alpha: 0.8),
-                      fontSize: 14,
+                      fontSize: 5.sp,
                     ),
                   ),
                 ],
@@ -81,53 +80,22 @@ class AppDrawer extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _sectionLabel("Navigation"),
-                    customTile(
-                      context: context,
-                      icon: Iconsax.home_bold,
-                      title: "Home",
-                      onTap: () {
-                        AppRoutes.pop();
-                        if (onTabSelected != null) {
-                          onTabSelected!(0);
-                        } else {
-                          AppRoutes.pushAndRemoveAll(
-                            const DashboardView(initialIndex: 0),
-                          );
-                        }
-                      },
-                    ),
-                    customTile(
-                      context: context,
-                      icon: Iconsax.box_bold,
-                      title: "My Orders",
-                      onTap: () {
-                        AppRoutes.pop();
-                        AppRoutes.push(
-                          const OrderTrackingView(isStandalone: true),
+                    _sectionLabel("Settings"),
+                    Consumer<ThemeManager>(
+                      builder: (context, themeManager, _) {
+                        return customTile(
+                          context: context,
+                          icon: themeManager.isSwapped
+                              ? Icons.light_mode
+                              : Icons.dark_mode,
+                          title: themeManager.isSwapped
+                              ? "Light Mode"
+                              : "Dark Mode",
+                          onTap: () => themeManager.toggleTheme(),
                         );
                       },
                     ),
-
-                    _sectionLabel("Account"),
-                    customTile(
-                      context: context,
-                      icon: Iconsax.user_bold,
-                      title: "My Profile",
-                      onTap: () {
-                        AppRoutes.pop();
-                        AppRoutes.push(const ProfileView());
-                      },
-                    ),
-                    customTile(
-                      context: context,
-                      icon: Iconsax.lock_bold,
-                      title: "Change Password",
-                      onTap: () {
-                        AppRoutes.pop();
-                        AppRoutes.push(const ChangePasswordView());
-                      },
-                    ),
+                    _sectionLabel("Company"),
                     customTile(
                       context: context,
                       icon: Iconsax.headphone_bold,
@@ -137,15 +105,14 @@ class AppDrawer extends StatelessWidget {
                         AppRoutes.push(const SupportView());
                       },
                     ),
-
-                    _sectionLabel("Company"),
                     customTile(
                       context: context,
                       icon: Iconsax.info_circle_bold,
                       title: "About Us",
                       onTap: () {
-                        AppRoutes.pop();
-                        AppRoutes.push(const AboutUsView());
+                        Utils.launchURL(
+                          'https://paanisoulhealing.com/about-us/',
+                        );
                       },
                     ),
                     customTile(
@@ -153,8 +120,9 @@ class AppDrawer extends StatelessWidget {
                       icon: Iconsax.headphone_bold,
                       title: "Contact Us",
                       onTap: () {
-                        AppRoutes.pop();
-                        AppRoutes.push(const ContactUsView());
+                        Utils.launchURL(
+                          'https://paanisoulhealing.com/contact-us/',
+                        );
                       },
                     ),
 
@@ -175,22 +143,6 @@ class AppDrawer extends StatelessWidget {
                       onTap: () {
                         AppRoutes.pop();
                         AppRoutes.push(const TermsConditionsView());
-                      },
-                    ),
-
-                    _sectionLabel("Settings"),
-                    Consumer<ThemeManager>(
-                      builder: (context, themeManager, _) {
-                        return customTile(
-                          context: context,
-                          icon: themeManager.isSwapped
-                              ? Icons.light_mode
-                              : Icons.dark_mode,
-                          title: themeManager.isSwapped
-                              ? "Light Mode"
-                              : "Dark Mode",
-                          onTap: () => themeManager.toggleTheme(),
-                        );
                       },
                     ),
 

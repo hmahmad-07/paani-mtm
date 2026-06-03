@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:icons_plus/icons_plus.dart';
 import '../../components/app_drawer.dart';
 import '../home/home_view.dart';
@@ -6,8 +8,6 @@ import '../cart/cart_view.dart';
 import '../orders/order_tracking_view.dart';
 import '../../components/custom_appbar.dart';
 import '../../../core/resources/app_colors.dart';
-import '../../../core/extensions/routes.dart';
-import '../notifications/notifications_view.dart';
 import '../../../core/extensions/sizer.dart';
 
 class DashboardView extends StatefulWidget {
@@ -38,68 +38,103 @@ class _DashboardViewState extends State<DashboardView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      drawer: AppDrawer(),
-      appBar: CustomAppBar(
-        hasLeading: true,
-        icon: Iconsax.menu_1_outline,
-        onTap: () {
-          _scaffoldKey.currentState?.openDrawer();
-        },
-        title: _titles[_currentIndex],
-        actions: _currentIndex == 0 ? _buildHomeActions() : null,
-      ),
-      body: Stack(children: [_pages[_currentIndex], _buildFloatingBottomBar()]),
-    );
-  }
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (didPop) return;
 
-  Widget _buildFloatingBottomBar() {
-    return Positioned(
-      bottom: 2.h,
-      left: 10.w,
-      right: 10.w,
-      child: Container(
-        height: 8.4.h,
-        decoration: BoxDecoration(
-          color: AppColor.appDarkColor,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: AppColor.black.withValues(alpha: 0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
+        if (_currentIndex != 0) {
+          setState(() {
+            _currentIndex = 0;
+          });
+        } else {
+          final shouldExit = await showCupertinoDialog<bool>(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: const Text('Exit App'),
+              content: const Text('Are you sure you want to exit?'),
+              actions: [
+                CupertinoDialogAction(
+                  child: const Text('No'),
+                  onPressed: () => Navigator.pop(context, false),
+                ),
+                CupertinoDialogAction(
+                  isDestructiveAction: true,
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Yes'),
+                ),
+              ],
             ),
-          ],
+          );
+
+          if (shouldExit == true) {
+            SystemNavigator.pop();
+          }
+        }
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        drawer: AppDrawer(),
+        appBar: CustomAppBar(
+          hasLeading: true,
+          icon: Iconsax.menu_1_outline,
+          onTap: () {
+            _scaffoldKey.currentState?.openDrawer();
+          },
+          title: _titles[_currentIndex],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+        body: Stack(
           children: [
-            _buildNavItem(
-              0,
-              Iconsax.home_1_outline,
-              Iconsax.home_1_bold,
-              'Home',
+            _pages[_currentIndex],
+            Positioned(
+              bottom: 2.h,
+              left: 7.w,
+              right: 7.w,
+              child: Container(
+                height: 8.4.h,
+                decoration: BoxDecoration(
+                  color: AppColor.appDarkColor,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColor.black.withValues(alpha: 0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    navItems(
+                      0,
+                      Iconsax.home_2_outline,
+                      Iconsax.home_2_bold,
+                      'Home',
+                    ),
+                    navItems(
+                      1,
+                      Iconsax.shopping_cart_outline,
+                      Iconsax.shopping_cart_bold,
+                      'Cart',
+                    ),
+                    navItems(
+                      2,
+                      Iconsax.box_outline,
+                      Iconsax.box_bold,
+                      'Orders',
+                    ),
+                  ],
+                ),
+              ),
             ),
-            _buildNavItem(
-              1,
-              Iconsax.shopping_cart_outline,
-              Iconsax.shopping_cart_bold,
-              'Cart',
-            ),
-            _buildNavItem(2, Iconsax.box_outline, Iconsax.box_bold, 'Orders'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(
-    int index,
-    IconData icon,
-    IconData activeIcon,
-    String label,
-  ) {
+  Widget navItems(int index, IconData icon, IconData activeIcon, String label) {
     final bool isSelected = _currentIndex == index;
     return GestureDetector(
       onTap: () {
@@ -118,10 +153,10 @@ class _DashboardViewState extends State<DashboardView> {
               color: isSelected
                   ? AppColor.white
                   : AppColor.white.withValues(alpha: 0.5),
-              size: 24,
+              size: 8.r,
             ),
             AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 250),
               height: isSelected ? 2.h : 0,
               child: isSelected
                   ? SingleChildScrollView(
@@ -133,7 +168,7 @@ class _DashboardViewState extends State<DashboardView> {
                             label,
                             style: TextStyle(
                               color: AppColor.white,
-                              fontSize: 10,
+                              fontSize: 3.2.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -146,16 +181,5 @@ class _DashboardViewState extends State<DashboardView> {
         ),
       ),
     );
-  }
-
-  List<Widget> _buildHomeActions() {
-    return [
-      IconButton(
-        icon: Icon(Iconsax.notification_outline, color: AppColor.appColor1),
-        onPressed: () {
-          AppRoutes.push(const NotificationsView());
-        },
-      ),
-    ];
   }
 }

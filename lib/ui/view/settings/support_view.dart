@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import '../../../core/resources/app_colors.dart';
 import '../../../core/extensions/sizer.dart';
+import '../../../core/utils/utils.dart';
 import '../../components/custom_appbar.dart';
-import '../../components/custom_button.dart';
 
 class SupportView extends StatelessWidget {
   const SupportView({super.key});
@@ -29,9 +29,9 @@ class SupportView extends StatelessWidget {
                 color: AppColor.appColor1,
               ),
             ),
-            4.height,
+            2.height,
             Text(
-              "How can we help you?",
+              "Get in Touch",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -41,46 +41,100 @@ class SupportView extends StatelessWidget {
             ),
             1.height,
             Text(
-              "Our team is available 24/7 to assist you with your water delivery needs.",
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColor.grey,
-              ),
+              "We're here to help and answer any question you might have. We look forward to hearing from you.",
+              style: TextStyle(fontSize: 14, color: AppColor.grey),
               textAlign: TextAlign.center,
             ),
-            6.height,
+            4.height,
             _buildSupportCard(
-              title: "Contact Us",
-              subtitle: "Call us directly at +92 300 0000000",
+              title: "Call Us",
+              subtitle: "+92 333 6597676",
               icon: Iconsax.call_bold,
               color: AppColor.blue,
-              onTap: () {},
-            ),
-            2.height,
-            _buildSupportCard(
-              title: "WhatsApp",
-              subtitle: "Chat with us for quick support",
-              icon: Iconsax.message_2_bold,
-              color: AppColor.green,
-              onTap: () {},
+              onTap: () => Utils.makePhoneCall("+923336597676"),
             ),
             2.height,
             _buildSupportCard(
               title: "Email Us",
-              subtitle: "support@paani.com",
-              icon: Iconsax.sms_bold,
+              subtitle: "customercare@paanisoulhealing.com",
+              icon: Iconsax.sms_search_outline,
               color: AppColor.orange,
-              onTap: () {},
+              onTap: () => Utils.sendEmail("customercare@paanisoulhealing.com"),
+            ),
+            2.height,
+            _buildSupportCard(
+              title: "Our Office",
+              subtitle: "24D, Batala Colony, Faisalabad.",
+              icon: Iconsax.location_bold,
+              color: AppColor.red,
+              onTap: () => Utils.launchURL(
+                "https://www.google.com/maps/search/?api=1&query=24D,+Batala+Colony,+Faisalabad",
+              ),
             ),
             6.height,
-            RoundButton(
-              width: double.maxFinite,
-              title: "Visit Help Center",
-              buttonColor: AppColor.appDarkColor,
-              onPress: () {},
+            Text(
+              "Follow Us",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColor.appDarkColor,
+              ),
+            ),
+            3.height,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _socialIcon(
+                  Brand(Brands.facebook),
+                  () => Utils.launchURL(
+                    "https://www.facebook.com/paani.officiall/",
+                  ),
+                ),
+                5.width,
+                _socialIcon(
+                  Brand(Brands.instagram),
+                  () => Utils.launchURL(
+                    "https://www.instagram.com/paani.officiall/",
+                  ),
+                ),
+                5.width,
+                _socialIcon(
+                  Brand(Brands.linkedin),
+                  () => Utils.launchURL(
+                    "https://www.linkedin.com/company/paani-76",
+                  ),
+                ),
+                5.width,
+                _socialIcon(
+                  Brand(Brands.whatsapp),
+                  () => Utils.openWhatsApp("+923336597676"),
+                ),
+              ],
+            ),
+            4.height,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _socialIcon(Widget icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(2.r),
+        decoration: BoxDecoration(
+          color: AppColor.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColor.grey.withValues(alpha: .15),
+              blurRadius: 5,
+              spreadRadius: 1,
             ),
           ],
         ),
+        child: SizedBox(height: 12.w, width: 12.w, child: icon),
       ),
     );
   }

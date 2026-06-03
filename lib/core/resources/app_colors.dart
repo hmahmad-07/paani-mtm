@@ -24,18 +24,28 @@ class AppColor {
   static Color white = const Color(0xFFFFFFFF);
   static Color transparent = Colors.transparent;
 
-  static void swapColors() {
-    final tempWhite = white;
-    white = black;
-    black = tempWhite;
+  static void applyTheme(bool dark) {
+    // Reset to defaults first to ensure predictable state
+    white = const Color(0xFFFFFFFF);
+    black = const Color(0xFF111111);
+    lightGrey = const Color(0xFFE3E3E3);
+    darkGrey = const Color(0xFF4B4B4B);
+    appDarkColor = const Color(0xFF181E4C);
+    appLightColor = const Color.fromARGB(255, 251, 246, 233);
 
-    final tempLight = lightGrey;
-    lightGrey = darkGrey;
-    darkGrey = tempLight;
+    if (dark) {
+      final tempWhite = white;
+      white = black;
+      black = tempWhite;
 
-    final tempAppDark = appDarkColor;
-    appDarkColor = appLightColor;
-    appLightColor = tempAppDark;
+      final tempLight = lightGrey;
+      lightGrey = darkGrey;
+      darkGrey = tempLight;
+
+      final tempAppDark = appDarkColor;
+      appDarkColor = appLightColor;
+      appLightColor = tempAppDark;
+    }
   }
 }
 
@@ -45,17 +55,15 @@ class ThemeManager with ChangeNotifier {
   bool get isSwapped => _isSwapped;
 
   ThemeManager([bool initialSwapped = false]) {
-    if (initialSwapped) {
-      _isSwapped = true;
-      AppColor.swapColors();
-    }
+    _isSwapped = initialSwapped;
+    AppColor.applyTheme(_isSwapped);
   }
 
   Future<void> toggleTheme() async {
     _isSwapped = !_isSwapped;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isSwapped', _isSwapped);
-    AppColor.swapColors();
+    AppColor.applyTheme(_isSwapped);
     AppRoutes.pushAndRemoveAll(const SplashView());
     notifyListeners();
   }

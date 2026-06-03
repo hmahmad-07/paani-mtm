@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'core/controllers/auth_controller.dart';
 import 'core/controllers/cart_controller.dart';
+import 'core/controllers/order_controller.dart';
 import 'core/extensions/routes.dart';
 import 'core/extensions/sizer.dart';
 import 'core/resources/app_colors.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthController(), lazy: true),
         ChangeNotifierProvider(create: (_) => ThemeManager(isSwapped)),
         ChangeNotifierProvider(create: (_) => CartController()),
+        ChangeNotifierProvider(create: (_) => OrderController()),
       ],
       child: Consumer<ThemeManager>(
         builder: (context, themeManager, _) {

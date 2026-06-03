@@ -10,7 +10,7 @@ import '../../../core/extensions/routes.dart';
 
 import '../../components/custom_button.dart';
 import '../../components/item_stepper.dart';
-import 'user_details_view.dart';
+import 'checkout_view.dart';
 
 class CartView extends StatelessWidget {
   final bool showBottomPadding;
@@ -120,8 +120,6 @@ class CartView extends StatelessWidget {
                                     ),
                                   ),
                                   4.width,
-
-                                  // ---- Product Info ----
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
@@ -164,7 +162,7 @@ class CartView extends StatelessWidget {
                                         Text(
                                           'Rs. ${price.toStringAsFixed(2)}',
                                           style: TextStyle(
-                                            fontWeight: FontWeight.w900,
+                                            fontWeight: FontWeight.bold,
                                             fontSize: 14,
                                             color: AppColor.appColor1,
                                           ),
@@ -173,7 +171,6 @@ class CartView extends StatelessWidget {
                                     ),
                                   ),
 
-                                  // ---- Stepper ----
                                   ItemStepper(
                                     quantity: cartItem.quantity,
                                     size: 24,
@@ -189,7 +186,6 @@ class CartView extends StatelessWidget {
                         ),
                       ),
 
-                      // ---- Bottom Total & Checkout ----
                       Container(
                         padding: EdgeInsets.fromLTRB(
                           6.w,
@@ -285,7 +281,7 @@ class CartView extends StatelessWidget {
                               title: 'Proceed to Checkout',
                               buttonColor: AppColor.appColor1,
                               onPress: () {
-                                AppRoutes.push(const UserDetailsView());
+                                AppRoutes.push(const CheckoutView());
                               },
                             ),
                           ],

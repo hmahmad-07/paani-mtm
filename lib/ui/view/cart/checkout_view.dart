@@ -1,16 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:provider/provider.dart';
-
-import '../../../core/utils/utils.dart';
 import '../../../core/controllers/cart_controller.dart';
 import '../../../core/resources/app_colors.dart';
 import '../../../core/extensions/sizer.dart';
-import '../../../core/extensions/routes.dart';
-import '../../components/custom_field.dart';
 import '../../components/custom_button.dart';
 import '../../components/custom_appbar.dart';
+import '../../../core/utils/utils.dart';
 import '../dashboard/dashboard_view.dart';
+import '../../../core/extensions/routes.dart';
 
 class CheckoutView extends StatefulWidget {
   const CheckoutView({super.key});
@@ -20,21 +20,16 @@ class CheckoutView extends StatefulWidget {
 }
 
 class _CheckoutViewState extends State<CheckoutView> {
-  final TextEditingController addressController = TextEditingController();
-
-  @override
-  void dispose() {
-    addressController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<CartController>(
       builder: (context, cartVC, child) {
         final items = cartVC.cartItems.entries.toList();
-        const double deliveryFee = 50.0;
-        final double total = cartVC.totalAmount + deliveryFee;
+        final double total = cartVC.totalAmount;
+        final int totalItems = cartVC.cartItems.values.fold(
+          0,
+          (sum, item) => sum + item.quantity,
+        );
 
         return Scaffold(
           backgroundColor: AppColor.white,
@@ -51,26 +46,6 @@ class _CheckoutViewState extends State<CheckoutView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _sectionTitle(
-                          'Delivery Address',
-                          Iconsax.location_bold,
-                        ),
-                        2.height,
-                        Container(
-                          decoration: _cardDecoration(),
-                          padding: EdgeInsets.only(
-                            right: 4.w,
-                            left: 4.w,
-                            bottom: 4.5.w,
-                          ),
-                          child: CustomField(
-                            controller: addressController,
-                            hintText: 'Enter complete address',
-                            keyType: TextInputType.streetAddress,
-                            maxLine: 3,
-                          ),
-                        ),
-                        3.height,
                         _sectionTitle('Order Items', Iconsax.box_bold),
                         2.height,
                         Container(
@@ -81,8 +56,6 @@ class _CheckoutViewState extends State<CheckoutView> {
                                 final idx = entry.key;
                                 final cartItem = entry.value.value;
                                 final product = cartItem.product;
-
-                                // ---------- Raw Map Fields ----------
                                 final String itemName =
                                     product['ITEM_NAME'] ?? '';
                                 final double price =
@@ -98,7 +71,6 @@ class _CheckoutViewState extends State<CheckoutView> {
                                       ),
                                       child: Row(
                                         children: [
-                                          // ---- Product Image ----
                                           Container(
                                             height: 14.w,
                                             width: 14.w,
@@ -110,24 +82,66 @@ class _CheckoutViewState extends State<CheckoutView> {
                                             ),
                                             child: Padding(
                                               padding: EdgeInsets.all(1.w),
-                                              child: Image.asset(
-                                                'assets/19-litr-bottle.webp', // default — replace with Image.network when real URL comes
+                                              child: CachedNetworkImage(
+                                                imageUrl:
+                                                    product['IMAGE_URL'] ?? '',
                                                 fit: BoxFit.contain,
+                                                placeholder: (context, url) =>
+                                                    Skeletonizer(
+                                                      enabled: true,
+                                                      effect: ShimmerEffect(
+                                                        baseColor: AppColor
+                                                            .lightGrey
+                                                            .withValues(
+                                                              alpha: 0.3,
+                                                            ),
+                                                        highlightColor: AppColor
+                                                            .white
+                                                            .withValues(
+                                                              alpha: 0.8,
+                                                            ),
+                                                      ),
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          color: AppColor
+                                                              .lightGrey
+                                                              .withValues(
+                                                                alpha: 0.3,
+                                                              ),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                8,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                errorWidget:
+                                                    (
+                                                      context,
+                                                      url,
+                                                      error,
+                                                    ) => Icon(
+                                                      Icons
+                                                          .image_not_supported_outlined,
+                                                      color: AppColor.grey
+                                                          .withValues(
+                                                            alpha: 0.5,
+                                                          ),
+                                                      size: 20,
+                                                    ),
                                               ),
                                             ),
                                           ),
                                           3.width,
-
-                                          // ---- Product Info ----
                                           Expanded(
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  itemName,
+                                                  '${idx + 1}. $itemName',
                                                   style: TextStyle(
-                                                    fontWeight: FontWeight.w700,
+                                                    fontWeight: FontWeight.bold,
                                                     fontSize: 13,
                                                     color:
                                                         AppColor.appDarkColor,
@@ -184,7 +198,8 @@ class _CheckoutViewState extends State<CheckoutView> {
                                                 ),
                                               ),
                                               Text(
-                                                'Rs. ${(price * cartItem.quantity).toStringAsFixed(0)}',
+                                                (price * cartItem.quantity)
+                                                    .toStringAsFixed(0),
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.w800,
                                                   color: AppColor.appColor1,
@@ -217,14 +232,11 @@ class _CheckoutViewState extends State<CheckoutView> {
                           padding: EdgeInsets.all(4.w),
                           child: Column(
                             children: [
+                              _summaryRow('Total Items', '$totalItems'),
+                              1.h.height,
                               _summaryRow(
                                 'Subtotal',
-                                'Rs. ${cartVC.totalAmount.toStringAsFixed(0)}',
-                              ),
-                              2.height,
-                              _summaryRow(
-                                'Delivery Fee',
-                                'Rs. ${deliveryFee.toStringAsFixed(0)}',
+                                cartVC.totalAmount.toStringAsFixed(0),
                               ),
                               Divider(height: 3.h, color: AppColor.lightGrey),
                               Row(
@@ -240,7 +252,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                                     ),
                                   ),
                                   Text(
-                                    'Rs. ${total.toStringAsFixed(0)}',
+                                    total.toStringAsFixed(0),
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w900,
@@ -309,15 +321,23 @@ class _CheckoutViewState extends State<CheckoutView> {
                   ),
                   child: RoundButton(
                     width: double.infinity,
-                    title: 'Confirm Order  •  Rs. ${total.toStringAsFixed(0)}',
+                    title:
+                        'Confirm Order  •  $totalItems Item${totalItems > 1 ? 's' : ''}  •  ${total.toStringAsFixed(0)}',
                     buttonColor: AppColor.appColor1,
-                    onPress: () {
-                      cartVC.clearCart();
-                      AppRoutes.pushAndRemoveAll(const DashboardView());
-                      Utils.showSnackBar(
-                        context,
-                        '🎉 Order placed successfully!',
-                      );
+                    onPress: () async {
+                      _showLoadingDialog(context);
+                      final success = await cartVC.placeOrder();
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        if (success) {
+                          _showSuccessDialog(context);
+                        } else {
+                          Utils.showSnackBar(
+                            context,
+                            '❌ Failed to place order. Try again.',
+                          );
+                        }
+                      }
                     },
                   ),
                 ),
@@ -362,19 +382,161 @@ class _CheckoutViewState extends State<CheckoutView> {
   }
 
   Widget _summaryRow(String label, String value, {Color? valueColor}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: TextStyle(fontSize: 13, color: AppColor.grey)),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: valueColor ?? AppColor.appDarkColor,
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 0.5.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(fontSize: 14, color: AppColor.grey)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: valueColor ?? AppColor.appDarkColor,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
+    );
+  }
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            padding: EdgeInsets.all(6.w),
+            decoration: BoxDecoration(
+              color: AppColor.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColor.black.withValues(alpha: 0.1),
+                  blurRadius: 20,
+                  spreadRadius: 5,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      height: 60,
+                      width: 60,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColor.appColor1,
+                        ),
+                        strokeWidth: 3,
+                      ),
+                    ),
+                    Icon(
+                      Iconsax.shopping_cart_bold,
+                      color: AppColor.appColor1,
+                      size: 24,
+                    ),
+                  ],
+                ),
+                3.height,
+                Text(
+                  'Processing Order',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppColor.appDarkColor,
+                  ),
+                ),
+                1.height,
+                Text(
+                  'Please wait while we confirm your order...',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: AppColor.grey),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSuccessDialog(BuildContext context) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: '',
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (context, anim1, anim2) => const SizedBox(),
+      transitionBuilder: (context, anim1, anim2, child) {
+        final scale = Tween<double>(
+          begin: 0.5,
+          end: 1.0,
+        ).animate(CurvedAnimation(parent: anim1, curve: Curves.elasticOut));
+        return ScaleTransition(
+          scale: scale,
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  height: 80,
+                  width: 80,
+                  decoration: BoxDecoration(
+                    color: AppColor.green.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Iconsax.tick_circle_bold,
+                    color: AppColor.green,
+                    size: 50,
+                  ),
+                ),
+                3.height,
+                Text(
+                  'Order Placed!',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: AppColor.appDarkColor,
+                  ),
+                ),
+                1.h.height,
+                Text(
+                  'Your water order has been successfully placed. We will notify you soon.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColor.darkGrey,
+                    height: 1.4,
+                  ),
+                ),
+                4.height,
+                RoundButton(
+                  width: double.infinity,
+                  title: 'Back to Home',
+                  buttonColor: AppColor.appColor1,
+                  onPress: () {
+                    AppRoutes.pushAndRemoveAll(
+                      const DashboardView(initialIndex: 0),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

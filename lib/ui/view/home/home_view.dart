@@ -19,6 +19,8 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   late Future<void> productsDetail;
+  final TextEditingController searchController = TextEditingController();
+  String searchQuery = '';
 
   @override
   void initState() {
@@ -26,12 +28,17 @@ class _HomeViewState extends State<HomeView> {
     productsDetail = refreshProducts();
   }
 
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> refreshProducts() async {
     final cartVC = Provider.of<CartController>(context, listen: false);
     await cartVC.fetchProducts();
   }
 
-  // ---- Dummy skeleton product for shimmer ----
   Map<String, dynamic> get _dummyProduct => {
     'ITEM_ID': '0',
     'ITEM_NAME': 'Loading product name here',
@@ -46,9 +53,24 @@ class _HomeViewState extends State<HomeView> {
     return Consumer<CartController>(
       builder: (context, cartVC, child) {
         final isLoading = cartVC.isLoadingProducts;
-        final products = isLoading
+        final filteredProducts = isLoading
             ? List.generate(6, (_) => _dummyProduct)
-            : cartVC.productList;
+            : cartVC.productList.where((product) {
+                final query = searchQuery.trim().toLowerCase();
+                if (query.isEmpty) return true;
+                final itemName = (product['ITEM_NAME'] ?? '')
+                    .toString()
+                    .toLowerCase();
+                final description = (product['DESCRIPTION'] ?? '')
+                    .toString()
+                    .toLowerCase();
+                final itemId = (product['ITEM_ID'] ?? '')
+                    .toString()
+                    .toLowerCase();
+                return itemName.contains(query) ||
+                    description.contains(query) ||
+                    itemId.contains(query);
+              }).toList();
 
         return Container(
           color: AppColor.white,
@@ -56,7 +78,6 @@ class _HomeViewState extends State<HomeView> {
           width: double.infinity,
           child: Column(
             children: [
-              // -------- Search Bar --------
               Padding(
                 padding: EdgeInsets.fromLTRB(8.w, 2.h, 8.w, 1.h),
                 child: Container(
@@ -72,10 +93,27 @@ class _HomeViewState extends State<HomeView> {
                     ],
                   ),
                   child: TextField(
+                    controller: searchController,
+                    onChanged: (value) {
+                      setState(() {
+                        searchQuery = value;
+                      });
+                    },
                     decoration: InputDecoration(
                       hintText: 'Search for products...',
                       hintStyle: TextStyle(color: AppColor.grey, fontSize: 14),
                       prefixIcon: Icon(Icons.search, color: AppColor.grey),
+                      suffixIcon: searchQuery.isEmpty
+                          ? null
+                          : GestureDetector(
+                              onTap: () {
+                                searchController.clear();
+                                setState(() {
+                                  searchQuery = '';
+                                });
+                              },
+                              child: Icon(Icons.close, color: AppColor.grey),
+                            ),
                       filled: true,
                       fillColor: AppColor.white,
                       contentPadding: EdgeInsets.symmetric(
@@ -99,9 +137,8 @@ class _HomeViewState extends State<HomeView> {
                 ),
               ),
 
-              // -------- Product Grid --------
               Expanded(
-                child: !isLoading && products.isEmpty
+                child: !isLoading && filteredProducts.isEmpty
                     ? Center(
                         child: Text(
                           'No products found',
@@ -119,13 +156,12 @@ class _HomeViewState extends State<HomeView> {
                           crossAxisCount: 2,
                           mainAxisSpacing: 6.w,
                           crossAxisSpacing: 6.w,
-                          itemCount: products.length,
+                          itemCount: filteredProducts.length,
                           itemBuilder: (context, index) {
-                            final product = products[index];
+                            final product = filteredProducts[index];
 
                             final String itemName = product['ITEM_NAME'] ?? '';
                             final String price = product['PRICE'] ?? '0';
-                            final String stockQty = product['STOCK_QTY'] ?? '0';
 
                             final bool isEmptyBottle = itemName
                                 .toLowerCase()
@@ -134,7 +170,7 @@ class _HomeViewState extends State<HomeView> {
                             return Container(
                               decoration: BoxDecoration(
                                 color: AppColor.white,
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(5.r),
                                 boxShadow: [
                                   BoxShadow(
                                     color: AppColor.grey.withValues(alpha: .1),
@@ -148,14 +184,14 @@ class _HomeViewState extends State<HomeView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   ClipRRect(
-                                    borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(20),
+                                    borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(5.r),
                                     ),
                                     child: Container(
                                       color: AppColor.lightGrey.withValues(
                                         alpha: 0.2,
                                       ),
-                                      height: 22.h,
+                                      height: 18.h,
                                       width: double.infinity,
                                       padding: EdgeInsets.all(4.w),
                                       child: isLoading
@@ -203,7 +239,6 @@ class _HomeViewState extends State<HomeView> {
                                             ),
                                     ),
                                   ),
-
                                   Padding(
                                     padding: EdgeInsets.all(4.w),
                                     child: Column(
@@ -213,8 +248,8 @@ class _HomeViewState extends State<HomeView> {
                                         Text(
                                           itemName,
                                           style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 4.sp,
                                             color: AppColor.appDarkColor,
                                             height: 1.2,
                                           ),
@@ -225,25 +260,16 @@ class _HomeViewState extends State<HomeView> {
                                         Text(
                                           'Rs. $price',
                                           style: TextStyle(
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 5.5.sp,
                                             color: AppColor.appColor1,
-                                          ),
-                                        ),
-                                        0.5.height,
-
-                                        // Stock
-                                        Text(
-                                          'Stock: $stockQty',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            color: AppColor.grey,
                                           ),
                                         ),
                                         1.5.height,
                                         RoundButton(
-                                          height: 32,
+                                          height: 4.8.h,
                                           elevation: 0,
+                                          buttonRadius: 3.r,
                                           width: double.maxFinite,
                                           buttonColor: isEmptyBottle
                                               ? Colors.green

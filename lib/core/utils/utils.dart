@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:paani/core/extensions/sizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../resources/app_colors.dart';
 import '../resources/app_images.dart';
 
@@ -59,9 +60,37 @@ class Utils {
   }
 
   static Future<void> launchURL(String url) async {
-    // ignore: deprecated_member_use
-    // if (await canLaunch(url)) {
-    //   await launch(url);
-    // }
+    final Uri uri = Uri.parse(url);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        debugPrint('Could not launch $url');
+      }
+    } catch (e) {
+      debugPrint('Error launching URL: $e');
+    }
+  }
+
+  static Future<void> makePhoneCall(String phoneNumber) async {
+    final Uri uri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  static Future<void> sendEmail(String email) async {
+    final Uri uri = Uri(scheme: 'mailto', path: email);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  static Future<void> openWhatsApp(String number) async {
+    final cleanNumber = number.replaceAll('+', '').replaceAll(' ', '');
+    final Uri uri = Uri.parse("https://wa.me/$cleanNumber");
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 }
