@@ -28,8 +28,8 @@ class _DashboardViewState extends State<DashboardView> {
     _currentIndex = widget.initialIndex;
   }
 
-  final List<Widget> _pages = [
-    const HomeView(),
+  List<Widget> get _pages => [
+    HomeView(scaffoldKey: _scaffoldKey),
     const CartView(showBottomPadding: true),
     const OrderTrackingView(),
   ];
@@ -75,14 +75,16 @@ class _DashboardViewState extends State<DashboardView> {
       child: Scaffold(
         key: _scaffoldKey,
         drawer: AppDrawer(),
-        appBar: CustomAppBar(
-          hasLeading: true,
-          icon: Iconsax.menu_1_outline,
-          onTap: () {
-            _scaffoldKey.currentState?.openDrawer();
-          },
-          title: _titles[_currentIndex],
-        ),
+        appBar: _currentIndex == 0
+            ? null
+            : CustomAppBar(
+                hasLeading: true,
+                icon: Iconsax.menu_1_outline,
+                onTap: () {
+                  _scaffoldKey.currentState?.openDrawer();
+                },
+                title: _titles[_currentIndex],
+              ),
         body: Stack(
           children: [
             _pages[_currentIndex],

@@ -78,7 +78,6 @@ class _LoginViewState extends State<LoginView> {
                       );
                       return;
                     }
-
                     await authVC.login(context);
                   },
                 ),

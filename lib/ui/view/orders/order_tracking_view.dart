@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/controllers/order_controller.dart';
@@ -47,6 +48,10 @@ class _OrderTrackingViewState extends State<OrderTrackingView> {
       builder: (context, orderVC, cartVC, child) {
         if (orderVC.isLoading && orderVC.orders.isEmpty) {
           return Skeletonizer(
+            effect: ShimmerEffect(
+              baseColor: AppColor.lightGrey.withValues(alpha: 0.3),
+              highlightColor: AppColor.white.withValues(alpha: 0.8),
+            ),
             enabled: true,
             child: ListView.builder(
               padding: EdgeInsets.fromLTRB(
@@ -112,7 +117,6 @@ class _OrderTrackingViewState extends State<OrderTrackingView> {
     required Order order,
     required CartController cartVC,
   }) {
-    // Get images for items
     List<String> imageUrls = [];
     for (var item in order.items) {
       final product = cartVC.productList.firstWhere(
@@ -129,15 +133,15 @@ class _OrderTrackingViewState extends State<OrderTrackingView> {
         AppRoutes.push(OrderDetailView(order: order));
       },
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 0.8.h),
+        margin: EdgeInsets.symmetric(vertical: 1.2.h),
         padding: EdgeInsets.all(4.w),
         decoration: BoxDecoration(
           color: AppColor.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(5.r),
           boxShadow: [
             BoxShadow(
               color: AppColor.grey.withValues(alpha: .1),
-              blurRadius: 3,
+              blurRadius: 2,
               spreadRadius: 2,
               offset: const Offset(0, .3),
             ),
@@ -162,8 +166,18 @@ class _OrderTrackingViewState extends State<OrderTrackingView> {
                         ? CachedNetworkImage(
                             imageUrl: imageUrls.first,
                             fit: BoxFit.contain,
-                            placeholder: (context, url) => const Center(
-                              child: CircularProgressIndicator(),
+                            placeholder: (context, url) => Shimmer.fromColors(
+                              baseColor: AppColor.lightGrey.withValues(
+                                alpha: 0.3,
+                              ),
+                              highlightColor: AppColor.white.withValues(
+                                alpha: 0.8,
+                              ),
+                              child: Container(
+                                width: double.infinity,
+                                height: double.infinity,
+                                color: Colors.white,
+                              ),
                             ),
                             errorWidget: (context, url, error) => Image.asset(
                               'assets/1.5-litr.webp',
@@ -185,7 +199,7 @@ class _OrderTrackingViewState extends State<OrderTrackingView> {
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 4,
+                            blurRadius: 2,
                             offset: const Offset(0, 2),
                           ),
                         ],
@@ -252,7 +266,7 @@ class _OrderTrackingViewState extends State<OrderTrackingView> {
                       Text(
                         'Rs. ${order.totalAmount.toStringAsFixed(0)}',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.bold,
                           color: AppColor.appColor1,
                           fontSize: 16,
                         ),
