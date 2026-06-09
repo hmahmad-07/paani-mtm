@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_constants.dart';
 
 // ============================================================
@@ -19,6 +20,11 @@ class CartItem {
 //  Cart Controller
 // ============================================================
 class CartController extends ChangeNotifier {
+  static const String _kCartKey = 'cart_items';
+
+  CartController() {
+    _loadCart();
+  }
   bool homeLoaded = false;
   bool isPlacingOrder = false;
 
@@ -127,17 +133,20 @@ class CartController extends ChangeNotifier {
       );
     }
     notifyListeners();
+    _saveCart();
   }
 
   void removeFromCart(String cartKey) {
     cartItems.remove(cartKey);
     notifyListeners();
+    _saveCart();
   }
 
   void incrementQuantity(String cartKey) {
     if (cartItems.containsKey(cartKey)) {
       cartItems[cartKey]!.quantity += 1;
       notifyListeners();
+      _saveCart();
     }
   }
 
@@ -149,7 +158,41 @@ class CartController extends ChangeNotifier {
         cartItems.remove(cartKey);
       }
       notifyListeners();
+      _saveCart();
     }
+  }
+
+  /// Set an item's quantity explicitly. If [product] is provided and the
+  /// item doesn't exist yet, it will be created. If [quantity] <= 0 the
+  /// item will be removed. Saves state after mutation.
+  void setItemQuantity(
+    String cartKey,
+    Map<String, dynamic>? product,
+    int quantity, {
+    bool isRefill = false,
+  }) {
+    if (quantity <= 0) {
+      cartItems.remove(cartKey);
+      notifyListeners();
+      _saveCart();
+      return;
+    }
+
+    if (cartItems.containsKey(cartKey)) {
+      cartItems[cartKey]!.quantity = quantity;
+      cartItems[cartKey]!.isRefill = isRefill;
+    } else {
+      if (product != null && product.isNotEmpty) {
+        cartItems[cartKey] = CartItem(
+          product: product,
+          quantity: quantity,
+          isRefill: isRefill,
+        );
+      }
+    }
+
+    notifyListeners();
+    _saveCart();
   }
 
   int getQuantity(String cartKey) {
@@ -159,6 +202,53 @@ class CartController extends ChangeNotifier {
   void clearCart() {
     cartItems.clear();
     notifyListeners();
+    _saveCart();
+  }
+
+  Future<void> _saveCart() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final Map<String, dynamic> serializable = {};
+      cartItems.forEach((key, item) {
+        serializable[key] = {
+          'product': item.product,
+          'quantity': item.quantity,
+          'isRefill': item.isRefill,
+        };
+      });
+      await prefs.setString(_kCartKey, json.encode(serializable));
+    } catch (e) {
+      log('Error saving cart: $e');
+    }
+  }
+
+  Future<void> _loadCart() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? data = prefs.getString(_kCartKey);
+      if (data == null || data.isEmpty) return;
+      final Map<String, dynamic> decoded = json.decode(data);
+      cartItems.clear();
+      decoded.forEach((key, value) {
+        try {
+          final prod = Map<String, dynamic>.from(value['product'] ?? {});
+          final qty = (value['quantity'] is int)
+              ? value['quantity']
+              : int.tryParse(value['quantity']?.toString() ?? '0') ?? 0;
+          final isRefill = value['isRefill'] == true;
+          if (prod.isNotEmpty && qty > 0) {
+            cartItems[key] = CartItem(
+              product: prod,
+              quantity: qty,
+              isRefill: isRefill,
+            );
+          }
+        } catch (_) {}
+      });
+      notifyListeners();
+    } catch (e) {
+      log('Error loading cart: $e');
+    }
   }
 
   // ================================================================ Place Order =================================================================

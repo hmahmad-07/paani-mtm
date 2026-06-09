@@ -43,6 +43,7 @@ class _ProductDetailViewState extends State<ProductDetailView>
   late final Animation<double> _fadeAnimation;
   late final Animation<Offset> _slideAnimation;
   late final Animation<double> _priceScaleAnimation;
+  late CartController _cartVC;
 
   // ── Derived getters ────────────────────────
   String get _itemName => _selectedProduct['ITEM_NAME'] ?? '';
@@ -60,6 +61,32 @@ class _ProductDetailViewState extends State<ProductDetailView>
     _initAnimations();
     _fadeController.forward();
     _slideController.forward();
+    // Sync quantity with cart if item already present
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        _cartVC = Provider.of<CartController>(context, listen: false);
+        final String itemId = _selectedProduct['ITEM_ID']?.toString() ?? '';
+        final cartKey = _isRefill ? '${itemId}_refill' : itemId;
+        final q = _cartVC.getQuantity(cartKey);
+        if (q > 0) setState(() => _quantity = q);
+        // keep local quantity in sync when cart changes elsewhere
+        _cartVC.addListener(_syncQuantityWithCart);
+      } catch (_) {}
+    });
+  }
+
+  void _syncQuantityWithCart() {
+    try {
+      final String itemId = _selectedProduct['ITEM_ID']?.toString() ?? '';
+      final cartKey = _isRefill ? '${itemId}_refill' : itemId;
+      final q = _cartVC.getQuantity(cartKey);
+      if (q > 0 && q != _quantity) {
+        setState(() => _quantity = q);
+      } else if (q == 0 && _quantity != 1) {
+        // If removed from cart, reset to 1
+        setState(() => _quantity = 1);
+      }
+    } catch (_) {}
   }
 
   void _initAnimations() {
@@ -107,6 +134,9 @@ class _ProductDetailViewState extends State<ProductDetailView>
     _fadeController.dispose();
     _slideController.dispose();
     _priceController.dispose();
+    try {
+      _cartVC.removeListener(_syncQuantityWithCart);
+    } catch (_) {}
     super.dispose();
   }
 
@@ -121,11 +151,31 @@ class _ProductDetailViewState extends State<ProductDetailView>
   }
 
   void _onIncrement() {
-    setState(() => _quantity++);
+    final cartVC = Provider.of<CartController>(context, listen: false);
+    final String itemId = _selectedProduct['ITEM_ID']?.toString() ?? '';
+    final cartKey = _isRefill ? '${itemId}_refill' : itemId;
+    final inCart = cartVC.getQuantity(cartKey) > 0;
+    if (inCart) {
+      cartVC.incrementQuantity(cartKey);
+      setState(() => _quantity = cartVC.getQuantity(cartKey));
+    } else {
+      setState(() => _quantity++);
+    }
     _pulsePriceAnimation();
   }
 
   void _onDecrement() {
+    final cartVC = Provider.of<CartController>(context, listen: false);
+    final String itemId = _selectedProduct['ITEM_ID']?.toString() ?? '';
+    final cartKey = _isRefill ? '${itemId}_refill' : itemId;
+    final inCart = cartVC.getQuantity(cartKey) > 0;
+    if (inCart) {
+      cartVC.decrementQuantity(cartKey);
+      setState(() => _quantity = cartVC.getQuantity(cartKey));
+      _pulsePriceAnimation();
+      return;
+    }
+
     if (_quantity > 1) {
       setState(() => _quantity--);
       _pulsePriceAnimation();
@@ -138,11 +188,23 @@ class _ProductDetailViewState extends State<ProductDetailView>
 
   void _onAddToCart() {
     final cartVC = Provider.of<CartController>(context, listen: false);
-    cartVC.addToCart(
-      _selectedProduct,
-      isRefill: _isRefill,
-      quantity: _quantity,
-    );
+    final String itemId = _selectedProduct['ITEM_ID']?.toString() ?? '';
+    final cartKey = _isRefill ? '${itemId}_refill' : itemId;
+
+    if (cartVC.getQuantity(cartKey) > 0) {
+      cartVC.setItemQuantity(
+        cartKey,
+        _selectedProduct,
+        _quantity,
+        isRefill: _isRefill,
+      );
+    } else {
+      cartVC.addToCart(
+        _selectedProduct,
+        isRefill: _isRefill,
+        quantity: _quantity,
+      );
+    }
     AppRoutes.push(
       Scaffold(
         backgroundColor: AppColor.white,
@@ -963,8 +1025,9 @@ class _RelatedProductsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cartVC = Provider.of<CartController>(context);
-    final products =
-        cartVC.productList.where((p) => p['ITEM_ID'] != currentId).toList();
+    final products = cartVC.productList
+        .where((p) => p['ITEM_ID'] != currentId)
+        .toList();
 
     if (products.isEmpty) return const SizedBox();
 
@@ -1001,7 +1064,10 @@ class _RelatedProductsSection extends StatelessWidget {
                 onTap: () => onSelect(product),
                 child: Container(
                   width: 38.w,
-                  margin: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 1.h),
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 1.5.w,
+                    vertical: 1.h,
+                  ),
                   padding: EdgeInsets.all(2.5.w),
                   decoration: BoxDecoration(
                     color: AppColor.white,
