@@ -5,10 +5,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'core/controllers/auth_controller.dart';
 import 'core/controllers/cart_controller.dart';
+import 'core/controllers/connectivity_controller.dart';
 import 'core/controllers/order_controller.dart';
 import 'core/extensions/routes.dart';
 import 'core/extensions/sizer.dart';
 import 'core/resources/app_colors.dart';
+import 'ui/view/network/no_internet_view.dart';
 import 'ui/view/splash_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,25 +38,40 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthController(), lazy: true),
         ChangeNotifierProvider(create: (_) => ThemeManager(isSwapped)),
+        ChangeNotifierProvider(create: (_) => ConnectivityController()),
         ChangeNotifierProvider(create: (_) => CartController()),
         ChangeNotifierProvider(create: (_) => OrderController()),
       ],
+
       child: Consumer<ThemeManager>(
         builder: (context, themeManager, _) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             navigatorKey: AppRoutes.navigatorKey,
-            title: 'PAANI',
+            title: 'PAANI.',
             theme: AppTheme.lightTheme.copyWith(
               textTheme: GoogleFonts.interTextTheme(
                 AppTheme.lightTheme.textTheme,
               ),
             ),
-            builder: (context, child) => GestureDetector(
-              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-              behavior: HitTestBehavior.translucent,
-              child: child,
-            ),
+            builder: (context, child) {
+              return GestureDetector(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                behavior: HitTestBehavior.translucent,
+                child: Consumer<ConnectivityController>(
+                  builder: (context, connectivity, _) {
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        child ?? const SizedBox.shrink(),
+                        if (!connectivity.isOnline)
+                          const Positioned.fill(child: NoInternetView()),
+                      ],
+                    );
+                  },
+                ),
+              );
+            },
             home: const SplashView(),
           );
         },
